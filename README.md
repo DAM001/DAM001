@@ -1,4 +1,4 @@
-### [Hello there! <br> General Kenobi!](https://www.youtube.com/watch?v=frszEJb0aOo)
+### [Hello there!](https://www.youtube.com/watch?v=frszEJb0aOo)
 
 <!--
 [website]: http://www.dam.nhely.hu/
