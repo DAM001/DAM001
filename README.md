@@ -1,5 +1,5 @@
 ### Hello there!
-### [General Kenobi!][https://www.youtube.com/watch?v=frszEJb0aOo]
+### [General Kenobi!][youtube]
 
 <!--
 [website]: http://www.dam.nhely.hu/
