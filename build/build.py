@@ -68,7 +68,7 @@ def station(x, y, color):
     return f'<circle cx="{x}" cy="{y}" r="9" fill="{C["paper"]}" stroke="{color}" stroke-width="4"/>'
 
 
-def faded_trunk(gid, y1, y2, fade_top, fade_bottom):
+def faded_trunk(gid, y1, y2, fade_top, fade_bottom, color=None, x=None):
     """Vertical trunk segment that fades out at an image edge, so the break
     between two images reads as the line continuing, not as a cut."""
     span = y2 - y1
@@ -82,9 +82,9 @@ def faded_trunk(gid, y1, y2, fade_top, fade_bottom):
     else:
         stops += [(1, 1)]
     grad = (f'<linearGradient id="{gid}" gradientUnits="userSpaceOnUse" x1="0" y1="{y1}" x2="0" y2="{y2}">'
-            + "".join(f'<stop offset="{o:.3f}" stop-color="{C["blue"]}" stop-opacity="{a}"/>' for o, a in stops)
+            + "".join(f'<stop offset="{o:.3f}" stop-color="{color or C["blue"]}" stop-opacity="{a}"/>' for o, a in stops)
             + "</linearGradient>")
-    rect = f'<rect x="{TRUNK - 2}" y="{y1}" width="4" height="{span}" fill="url(#{gid})"/>'
+    rect = f'<rect x="{(TRUNK if x is None else x) - 2}" y="{y1}" width="4" height="{span}" fill="url(#{gid})"/>'
     return grad, rect
 
 
@@ -132,7 +132,12 @@ def header():
         spans = "".join(f'<tspan class="{"hl" if hl else ""}">{html.escape(t)}</tspan>' for t, hl in parts)
         rows.append(f'<text x="82" y="{card_y + 37 + i * 26}" class="body">{spans}</text>')
     flight = f"M -40 {top - 8} C {W * .3} {top - 40}, {W * .62} {top + 12}, {W + 40} {top - 22}"
-    grad, trunk = faded_trunk("trunkA", sy, h, False, True)
+    # all three lines start at the name station and run down, touching, fading at the edge
+    grad, trunk = "", ""
+    for i, (color, x) in enumerate(BUNDLE):
+        g, r = faded_trunk(f"trunkA{i}", sy, h, False, True, color, x)
+        grad += g
+        trunk += r
     style = f"""
   .name {{ font-size: 36px; font-weight: 900; fill: {C["ink"]}; }}
   .body {{ font-size: 16px; fill: {C["soft"]}; }}
@@ -141,8 +146,8 @@ def header():
              f'<animateMotion dur="12s" begin="0.5s" repeatCount="indefinite" rotate="auto" keyPoints="0;1;1" '
              f'keyTimes="0;0.45;1" calcMode="linear" path="{flight}"/></g>')
     body = f"""{trunk}
-{station(TRUNK, sy, C["blue"])}
-<text x="60" y="{sy + 12}" class="name">Dávid Attila Marcell</text>
+<circle cx="{TRUNK}" cy="{sy}" r="{HUB_R + 2}" fill="{C["paper"]}" stroke="{C["ink"]}" stroke-width="4"/>
+<text x="62" y="{sy + 12}" class="name">Dávid Attila Marcell</text>
 <rect x="61.5" y="{card_y + 1.5}" width="{W - 63}" height="{card_h - 3}" rx="8" fill="{C["paper"]}" stroke="{C["ink"]}" stroke-width="3"/>
 {"".join(rows)}
 {plane}"""
@@ -159,18 +164,29 @@ def header():
 #   GAMES     third row; climbs at 45deg to run right alongside the Web line
 #             for the stations they share (Pixi.js, Three.js).
 # Shared stations are one interchange dot (white ring), never duplicated.
-X0, STEP = 196, 112              # column x = X0 + col * STEP
+X0, STEP = 110, 129              # column x = X0 + col * STEP
 Y_HEAD = 52                      # "Tech stack" hub
 Y_LEGEND = 96                    # line colour badges, under the heading
-Y_WEB, Y_HW, Y_GAMES = 214, 266, 316
-Y_HW_TOP = 140                   # Hardware's row after it crosses Web
+Y_WEB, Y_HW, Y_GAMES = 214, 276, 338     # rows evenly spaced (with Y_HW_TOP)
+Y_HW_TOP = 152                   # Hardware's row after it crosses Web
 PARALLEL = 4                     # centre-to-centre gap of side-by-side lines = line width, so they touch
 BEND = 22                        # radius of the rounded 45deg bends
 STOP_R, HUB_R = 11, 14           # station / interchange dot radius
 
 
+# the three lines side by side, left to right (the rightmost turns off first)
+BUNDLE = [(C["green"], TRUNK - PARALLEL), (C["red"], TRUNK), (C["blue"], TRUNK + PARALLEL)]
+
+
 def col(c):
     return X0 + c * STEP
+
+
+def climb(c, y_from, y_to):
+    """A 45deg step centred in the gap after column c, so every turn sits
+    halfway between two stops with a straight run before and after it."""
+    mid, d = col(c) + STEP / 2, abs(y_from - y_to)
+    return [(mid - d / 2, y_from), (mid + d / 2, y_to)]
 
 
 def rounded(points, radii):
@@ -222,10 +238,8 @@ def tech_map():
     # Hardware: ESP32 on its row, then 45deg up through JavaScript to the top row.
     hw_up_start = (js_x - (Y_HW - Y_WEB), Y_HW)
     hw_up_end = (js_x + (Y_WEB - Y_HW_TOP), Y_HW_TOP)
-    # Games: Unity..Blender on its row, then 45deg up to run beside Web.
-    rise = Y_GAMES - games_y_top
-    g_up_end = (pixi_x - 6, games_y_top)
-    g_up_start = (g_up_end[0] - rise, Y_GAMES)
+    # Games climbs in two steps: after C# up to the row Hardware has left,
+    # after Blender up to run right beside Web.
 
     lines = {
         # name: (colour, bundle x, corner points after the hub, stations [(label, x, y)])
@@ -239,9 +253,10 @@ def tech_map():
                       ("Arduino", col(3), Y_HW_TOP), ("BLE / Serial", col(4), Y_HW_TOP),
                       ("3D printing", col(5), Y_HW_TOP)]),
         "GAMES": (C["green"], TRUNK - PARALLEL,
-                  [(TRUNK - PARALLEL, Y_GAMES), g_up_start, g_up_end, (col(5), games_y_top)],
-                  [("Unity", col(0), Y_GAMES), ("C#", col(1), Y_GAMES), ("Photon", col(2), Y_GAMES),
-                   ("Blender", col(3), Y_GAMES), ("Pixi.js", pixi_x, games_y_top),
+                  [(TRUNK - PARALLEL, Y_GAMES)] + climb(1, Y_GAMES, Y_HW) + climb(3, Y_HW, games_y_top)
+                  + [(col(5), games_y_top)],
+                  [("Unity", col(0), Y_GAMES), ("C#", col(1), Y_GAMES), ("Photon", col(2), Y_HW),
+                   ("Blender", col(3), Y_HW), ("Pixi.js", pixi_x, games_y_top),
                    ("Three.js", three_x, games_y_top)]),
     }
     h = Y_GAMES + 48
