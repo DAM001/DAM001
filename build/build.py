@@ -3,12 +3,8 @@
     python build/build.py [path-to-portfolioV6]
 
 Plain Python, no dependencies. Writes the SVGs into assets/ and README.md.
-Edit INTRO / LINKS below (and the stations in tech_map / tech_map_mobile)
-and re-run to change the content.
-
-Every map image comes in two layouts: a wide one for desktop and a narrow
-one that GitHub swaps in on phones (<picture> with a max-width media query),
-so the text stays readable at both sizes.
+Edit INTRO / LINKS below (and the stations in tech_map) and re-run to
+change the content. Phones get the same images, scaled down.
 
 Same map grammar as the portfolio (css/style.css, js/carts.js):
   - ring stations, each station's name as a heading
@@ -30,7 +26,6 @@ C = dict(cream="#18181a", paper="#232326", ink="#e2ddd0", soft="#b8b2a6",
          red="#e2483c", yellow="#f2b632", blue="#5090c8", green="#5aad7c")
 FONT = "'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif"
 W = 860          # desktop width (header + map share it, so the lines line up)
-MW = 420         # phone width
 TRUNK = 30
 PARALLEL = 4     # centre-to-centre gap of side-by-side lines = line width, so they touch
 # the three lines side by side, left to right (the rightmost turns off first)
@@ -263,7 +258,7 @@ def stations_svg(lines, label_pos):
         ys = [y for _, _, y, _ in where]
         cx, cy = sum(xs) / len(xs), (min(ys) + max(ys)) / 2
         if len(where) == 1 or max(xs) - min(xs) > 1 or max(ys) - min(ys) > PARALLEL * 2:
-            # one line, or the same tech on two separate lines (phone layout): a dot per place
+            # one line, or the same tech on two separate lines : a dot per place
             for color, x, y, i in where:
                 r = STOP_R if len(where) == 1 else SHARED_R
                 stroke = color if len(where) == 1 else C["ink"]
@@ -317,42 +312,6 @@ def tech_map():
     return svg(W, h, body, style, alt, defs), alt
 
 
-# ---------- phone tech map: the same three lines, one row each ----------
-# Same bundle off the hub, but each line gets its own straight row and the
-# names alternate above / below the line so they fit at a readable size.
-# Technologies shared between lines keep the white interchange ring.
-def tech_map_mobile():
-    head_y, legend_y = 58, 108
-    rows = [("WEB", C["blue"], ["HTML & CSS", "JavaScript", "TypeScript", "Node.js", "Pixi.js", "Three.js"]),
-            ("HARDWARE", C["red"], ["ESP32", "JavaScript", "C++", "Arduino", "BLE / Serial", "3D printing"]),
-            ("GAMES", C["green"], ["Unity", "C#", "Photon", "Blender", "Pixi.js", "Three.js"])]
-    first_y, gap = 190, 112
-    x0, x1 = 86, MW - 44
-    step = (x1 - x0) / 5
-    label = 15
-    h = first_y + gap * (len(rows) - 1) + 52
-    defs, lead = bundle("mm", 0, head_y, fade_top=True)
-    tracks, carts, lines = [], [], []
-    for li, ((name, color, stations), (_, bx)) in enumerate(zip(rows, reversed(BUNDLE))):
-        y = first_y + li * gap
-        pts = [(bx, head_y), (bx, y), (x1, y)]
-        elbow = 20 + (bx - (TRUNK - PARALLEL))
-        d, samples = rounded(pts, [elbow])
-        tracks.append(f'<path d="{d}" fill="none" stroke="{color}" stroke-width="4" stroke-linecap="round"/>')
-        placed = [(s, x0 + i * step, y) for i, s in enumerate(stations)]
-        carts.append(cart(color, d, distances(samples, [(bx, head_y)] + [(x, yy) for _, x, yy in placed]),
-                          offset=3.1 + li * 5.2))
-        lines.append((color, placed))
-    dots, labels = stations_svg(
-        lines, lambda x, y, r, i: (x, y + r + label + 2) if i % 2 == 0 else (x, y - r - 8))
-    style = LINE_STYLE + f"""
-  .title {{ font-size: 32px; }} .badge {{ font-size: 13px; }} .stop {{ font-size: {label}px; }}"""
-    body = "\n".join([lead] + tracks + dots + carts
-                     + [hub(TRUNK, head_y, 18), f'<text x="62" y="{head_y + 11}" class="title">Tech stack</text>']
-                     + legend(62, legend_y, 13) + labels)
-    return svg(MW, h, body, style, None, defs)
-
-
 # ---------- pill button (the app's outline button), optional static plane ----------
 def pill(label, plane=False):
     text_w = round(len(label) * 8.6)
@@ -374,34 +333,28 @@ for old in os.listdir(OUT):  # drop images from earlier designs
     os.remove(os.path.join(OUT, old))
 
 write("header.svg", header(W, 44, 19.5, 72))
-write("header-mobile.svg", header(MW, 27, 17, 36))
 tech_svg, tech_alt = tech_map()
 write("tech-stack.svg", tech_svg)
-write("tech-stack-mobile.svg", tech_map_mobile())
 for label, _, file, plane in LINKS:
     write(file, pill(label, plane))
 
 
-def picture(name, wide, narrow, alt):
-    # A plain <picture>, nothing around or inside it (tested on github.com):
-    # - the <source> swaps in the phone layout below 600px wide;
-    # - GitHub's page script leaves the <img> as the picture's direct child
-    #   with no link, so the map is not one big button (only the pills are
-    #   links). Wrapping the <img> in an anchor breaks the swap, and wrapping
-    #   the whole <picture> makes GitHub pull the <img> out of it.
-    return (f'<picture><source media="(max-width: 600px)" srcset="assets/{narrow}">'
-            f'<img src="assets/{wide}" alt="{html.escape(alt)}" width="100%"></picture>')
+def still(name, file, alt):
+    # Named anchor (no href): GitHub otherwise turns every bare image into a
+    # link to its own file, making the whole map one big button. Only the
+    # pills are real links.
+    return f'<a name="{name}"><img src="assets/{file}" alt="{html.escape(alt)}" width="100%"></a>'
 
 
 pills = "\n".join(f'<a href="{url}"><img src="assets/{file}" alt="{html.escape(label)}" height="38"></a>'
                   for label, url, file, _ in LINKS)
-readme = f'''{picture("about", "header.svg", "header-mobile.svg", "Dávid Attila Marcell — full-stack developer bridging web and hardware")}
+readme = f'''{still("about", "header.svg", "Dávid Attila Marcell — full-stack developer bridging web and hardware")}
 
 <p>
 {pills}
 </p>
 
-{picture("tech-stack", "tech-stack.svg", "tech-stack-mobile.svg", tech_alt)}
+{still("tech-stack", "tech-stack.svg", tech_alt)}
 
 <!-- Generated by build/build.py -->
 '''
