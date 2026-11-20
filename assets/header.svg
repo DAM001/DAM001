@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="840" height="268" viewBox="0 0 840 268" role="img" aria-label="Dávid Attila Marcell — full-stack developer bridging web and hardware">
+<style>
+  text { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif; }
+  .name { font-size: 36px; font-weight: 900; fill: #e2ddd0; }
+  .body { font-size: 16.5px; fill: #b8b2a6; }
+  .hl { fill: #5090c8; font-weight: 700; }
+  .stack { font-size: 13.5px; font-weight: 700; fill: #b8b2a6; letter-spacing: .3px; }
+  .cart { animation: ride 7s cubic-bezier(.45,0,.25,1) infinite; }
+  @keyframes ride {
+    0%, 12% { transform: translateY(0); }
+    70%, 100% { transform: translateY(216px); }
+  }
+  @media (prefers-reduced-motion: reduce) { .cart { animation: none; } }
+</style>
+<line x1="30" y1="44" x2="30" y2="268" stroke="#5090c8" stroke-width="4"/>
+<rect class="cart" x="23" y="38" width="14" height="26" rx="5" fill="#5090c8"/>
+<circle cx="30" cy="44" r="9" fill="#232326" stroke="#5090c8" stroke-width="4"/>
+<text x="60" y="57" class="name">Dávid Attila Marcell</text>
+<rect x="56" y="78" width="770" height="176" rx="12" fill="none" stroke="#5090c8" stroke-width="4"/>
+<rect x="61.5" y="83.5" width="759" height="165" rx="8" fill="#232326" stroke="#e2ddd0" stroke-width="3"/>
+<text x="80" y="134" class="body"><tspan class="">Hey, I&#x27;m </tspan><tspan class="hl">Marci</tspan><tspan class="">, a </tspan><tspan class="hl">full-stack developer</tspan><tspan class=""> bridging </tspan><tspan class="hl">web</tspan><tspan class=""> and </tspan><tspan class="hl">hardware</tspan><tspan class="">.</tspan></text><text x="80" y="161" class="body"><tspan class="">Research developer at </tspan><tspan class="hl">Bay Zoltán Research Institute</tspan><tspan class="">. I build </tspan><tspan class="hl">web apps</tspan><tspan class=""> and </tspan><tspan class="hl">games</tspan><tspan class="">,</tspan></text><text x="80" y="188" class="body"><tspan class="">teach programming, and tinker with </tspan><tspan class="hl">microchips</tspan><tspan class=""> when I get the chance.</tspan></text>
+<text x="80" y="230" class="stack">JavaScript · TypeScript · Node.js · Pixi.js · Three.js · ESP32 · C++ · Unity</text>
+</svg>
