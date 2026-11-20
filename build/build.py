@@ -150,47 +150,68 @@ def header():
 
 
 # ---------- tech stack: a hand-laid metro map ----------
-# All three lines leave the "Tech stack" station together as a parallel bundle
-# (like the portfolio's branches merging into the trunk), then fan out:
+# All three lines run in from the top, through the "Tech stack" hub, as one
+# parallel bundle (like the portfolio's branches merging into the trunk), then
+# fan out, every bend rounded:
 #   WEB       first row, straight across.
 #   HARDWARE  second row; cuts up at 45deg THROUGH the JavaScript station,
 #             crossing the Web line there, and carries on above it.
 #   GAMES     third row; climbs at 45deg to run right alongside the Web line
 #             for the stations they share (Pixi.js, Three.js).
 # Shared stations are one interchange dot (white ring), never duplicated.
-COLS = 6
 X0, STEP = 196, 112              # column x = X0 + col * STEP
-Y_HEAD = 52                      # "Tech stack" station
-Y_WEB, Y_HW, Y_GAMES = 200, 250, 300
-Y_HW_TOP = 120                   # Hardware's row after it crosses Web
-PARALLEL = 8                     # gap between two lines running side by side
+Y_HEAD = 52                      # "Tech stack" hub
+Y_LEGEND = 96                    # line colour badges, under the heading
+Y_WEB, Y_HW, Y_GAMES = 214, 266, 316
+Y_HW_TOP = 140                   # Hardware's row after it crosses Web
+PARALLEL = 4                     # centre-to-centre gap of side-by-side lines = line width, so they touch
+BEND = 22                        # radius of the rounded 45deg bends
+STOP_R, HUB_R = 11, 14           # station / interchange dot radius
 
 
 def col(c):
     return X0 + c * STEP
 
 
-def polyline(points):
-    return "M " + " L ".join(f"{x:.1f} {y:.1f}" for x, y in points)
+def rounded(points, radii):
+    """Polyline with every inner corner rounded (radii[i] for corner i).
+    Returns the SVG path and dense samples of it, for measuring distances."""
+    d = [f"M {points[0][0]:.1f} {points[0][1]:.1f}"]
+    samples = [points[0]]
+
+    def line_to(p):
+        a = samples[-1]
+        n = max(1, int(((p[0] - a[0]) ** 2 + (p[1] - a[1]) ** 2) ** .5 / 2))
+        samples.extend((a[0] + (p[0] - a[0]) * i / n, a[1] + (p[1] - a[1]) * i / n) for i in range(1, n + 1))
+        d.append(f"L {p[0]:.1f} {p[1]:.1f}")
+
+    for i in range(1, len(points) - 1):
+        (ax, ay), (bx, by), (cx, cy) = points[i - 1], points[i], points[i + 1]
+        la = ((bx - ax) ** 2 + (by - ay) ** 2) ** .5
+        lc = ((cx - bx) ** 2 + (cy - by) ** 2) ** .5
+        r = min(radii[i - 1], la / 2, lc / 2)
+        p1 = (bx + (ax - bx) * r / la, by + (ay - by) * r / la)   # where the curve starts
+        p2 = (bx + (cx - bx) * r / lc, by + (cy - by) * r / lc)   # and ends
+        line_to(p1)
+        for k in range(1, 13):
+            t = k / 12
+            samples.append(((1 - t) ** 2 * p1[0] + 2 * (1 - t) * t * bx + t * t * p2[0],
+                            (1 - t) ** 2 * p1[1] + 2 * (1 - t) * t * by + t * t * p2[1]))
+        d.append(f"Q {bx:.1f} {by:.1f} {p2[0]:.1f} {p2[1]:.1f}")
+    line_to(points[-1])
+    return " ".join(d), samples
 
 
-def distances(points, targets):
-    """Distance along the polyline to each target point (each lies on it)."""
+def distances(samples, targets):
+    """Distance along the sampled path to the sample nearest each target."""
+    run = [0.0]
+    for (ax, ay), (bx, by) in zip(samples, samples[1:]):
+        run.append(run[-1] + ((bx - ax) ** 2 + (by - ay) ** 2) ** .5)
     out = []
     for tx, ty in targets:
-        run = 0.0
-        for (ax, ay), (bx, by) in zip(points, points[1:]):
-            seg = ((bx - ax) ** 2 + (by - ay) ** 2) ** .5
-            # is the target on this segment?
-            cross = (bx - ax) * (ty - ay) - (by - ay) * (tx - ax)
-            dot = (tx - ax) * (bx - ax) + (ty - ay) * (by - ay)
-            if abs(cross) < 1e-6 * max(seg, 1) and -1e-6 <= dot <= seg * seg + 1e-6:
-                out.append(run + (dot / seg if seg else 0))
-                break
-            run += seg
-        else:
-            raise ValueError(f"station {tx},{ty} is not on the line")
-    return out
+        i = min(range(len(samples)), key=lambda k: (samples[k][0] - tx) ** 2 + (samples[k][1] - ty) ** 2)
+        out.append(run[i])
+    return out, run[-1]
 
 
 def tech_map():
@@ -203,76 +224,82 @@ def tech_map():
     hw_up_end = (js_x + (Y_WEB - Y_HW_TOP), Y_HW_TOP)
     # Games: Unity..Blender on its row, then 45deg up to run beside Web.
     rise = Y_GAMES - games_y_top
-    g_up_end = (pixi_x - 4, games_y_top)
+    g_up_end = (pixi_x - 6, games_y_top)
     g_up_start = (g_up_end[0] - rise, Y_GAMES)
 
     lines = {
-        # name: (colour, bundle x, row y, track after the elbow, stations [(label, x, y, label pos)])
-        "WEB": (C["blue"], TRUNK + PARALLEL, Y_WEB,
-                [(col(0), Y_WEB), (col(5), Y_WEB)],
+        # name: (colour, bundle x, corner points after the hub, stations [(label, x, y)])
+        "WEB": (C["blue"], TRUNK + PARALLEL,
+                [(TRUNK + PARALLEL, Y_WEB), (col(5), Y_WEB)],
                 [("HTML & CSS", col(0), Y_WEB), ("JavaScript", js_x, Y_WEB), ("TypeScript", col(2), Y_WEB),
                  ("Node.js", col(3), Y_WEB), ("Pixi.js", pixi_x, Y_WEB), ("Three.js", three_x, Y_WEB)]),
-        "HARDWARE": (C["red"], TRUNK, Y_HW,
-                     [(col(0), Y_HW), hw_up_start, hw_up_end, (col(5), Y_HW_TOP)],
+        "HARDWARE": (C["red"], TRUNK,
+                     [(TRUNK, Y_HW), hw_up_start, hw_up_end, (col(5), Y_HW_TOP)],
                      [("ESP32", col(0), Y_HW), ("JavaScript", js_x, Y_WEB), ("C++", col(2), Y_HW_TOP),
                       ("Arduino", col(3), Y_HW_TOP), ("BLE / Serial", col(4), Y_HW_TOP),
                       ("3D printing", col(5), Y_HW_TOP)]),
-        "GAMES": (C["green"], TRUNK - PARALLEL, Y_GAMES,
-                  [(col(0), Y_GAMES), g_up_start, g_up_end, (col(5), games_y_top)],
+        "GAMES": (C["green"], TRUNK - PARALLEL,
+                  [(TRUNK - PARALLEL, Y_GAMES), g_up_start, g_up_end, (col(5), games_y_top)],
                   [("Unity", col(0), Y_GAMES), ("C#", col(1), Y_GAMES), ("Photon", col(2), Y_GAMES),
                    ("Blender", col(3), Y_GAMES), ("Pixi.js", pixi_x, games_y_top),
                    ("Three.js", three_x, games_y_top)]),
     }
-    h = Y_GAMES + 46
-    r_base = 20
+    h = Y_GAMES + 48
 
-    grad, trunk = faded_trunk("trunkB", 0, Y_HEAD, True, False)
-    tracks, badges, carts, dots, labels = [], [], [], [], []
-    for li, (name, (color, bx, row_y, track, stations)) in enumerate(lines.items()):
-        r = r_base + (bx - (TRUNK - PARALLEL))       # nested elbows: outer lines curve wider
-        start = (bx + r, row_y)
-        lead = f"M {bx} {Y_HEAD} V {row_y - r} Q {bx} {row_y} {start[0]} {row_y} "
-        rest = " ".join(f"L {x:.1f} {y:.1f}" for x, y in [start] + track)
-        tracks.append(f'<path d="{lead}{rest}" fill="none" stroke="{color}" stroke-width="4" '
-                      f'stroke-linejoin="round" stroke-linecap="round"/>')
+    defs, leadins, tracks, carts, dots, labels = [], [], [], [], [], []
+    for li, (name, (color, bx, corners, stations)) in enumerate(lines.items()):
+        # lead-in from the top edge, fading in, so every line runs "from the beginning"
+        gid = f"in{li}"
+        defs.append(f'<linearGradient id="{gid}" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="{Y_HEAD}">'
+                    f'<stop offset="0" stop-color="{color}" stop-opacity="0"/>'
+                    f'<stop offset=".8" stop-color="{color}" stop-opacity="1"/></linearGradient>')
+        leadins.append(f'<rect x="{bx - 2}" y="0" width="4" height="{Y_HEAD}" fill="url(#{gid})"/>')
+        # the line itself: hub -> down the bundle -> its row, every corner rounded;
+        # outer lines of the bundle curve wider so the three elbows nest
+        elbow = 22 + (bx - (TRUNK - PARALLEL))
+        pts = [(bx, Y_HEAD)] + corners
+        d, samples = rounded(pts, [elbow] + [BEND] * (len(pts) - 2))
+        tracks.append(f'<path d="{d}" fill="none" stroke="{color}" stroke-width="4" stroke-linecap="round"/>')
+        stops, _ = distances(samples, [(bx, Y_HEAD)] + [(x, y) for _, x, y in stations])
+        carts.append(cart(color, d, stops, offset=4.7 + li * 6.3))
+
+    # colour legend under the heading
+    legend, lx = [], 60
+    for name, (color, *_rest) in lines.items():
         bw = len(name) * 8.4 + 22
-        badges.append(f'<rect x="{80}" y="{row_y - 11}" width="{bw}" height="22" rx="11" fill="{color}"/>'
-                      f'<text x="{80 + bw / 2}" y="{row_y + 4.5}" class="badge" text-anchor="middle">{name}</text>')
-        stops = distances(track, [(x, y) for _, x, y in stations])
-        carts.append(cart(color, polyline(track), stops, offset=4.7 + li * 6.3))
+        legend.append(f'<rect x="{lx}" y="{Y_LEGEND - 11}" width="{bw}" height="22" rx="11" fill="{color}"/>'
+                      f'<text x="{lx + bw / 2}" y="{Y_LEGEND + 4.5}" class="badge" text-anchor="middle">{name}</text>')
+        lx += bw + 10
 
-    # stations: one dot per technology; shared ones become a single interchange
+    # stations: one dot per technology; shared ones become a single interchange.
+    # Every name sits under its dot.
     seen = {}
-    for name, (color, _, _, _, stations) in lines.items():
+    for name, (color, _, _, stations) in lines.items():
         for label, x, y in stations:
             seen.setdefault(label, []).append((color, x, y))
     for label, where in seen.items():
-        if len(where) == 1:
-            color, x, y = where[0]
-            dots.append(station(x, y, color))
-            labels.append(f'<text x="{x}" y="{y + 28}" class="stop" text-anchor="middle">{html.escape(label)}</text>')
-            continue
         xs = [x for _, x, _ in where]
         ys = [y for _, _, y in where]
         cx, cy = sum(xs) / len(xs), (min(ys) + max(ys)) / 2
-        r = 11 + (max(ys) - min(ys)) / 2           # big enough to cover side-by-side lines
-        dots.append(f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="{C["paper"]}" stroke="{C["ink"]}" stroke-width="4"/>')
-        if label == "JavaScript":
-            # the lines cross here: label goes in the free upper-left corner
-            labels.append(f'<text x="{cx - 16}" y="{cy - 16}" class="stop" text-anchor="end">{html.escape(label)}</text>')
+        if len(where) == 1:
+            r = STOP_R
+            dots.append(f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="{C["paper"]}" stroke="{where[0][0]}" stroke-width="4"/>')
         else:
-            labels.append(f'<text x="{cx}" y="{cy + r + 19}" class="stop" text-anchor="middle">{html.escape(label)}</text>')
+            r = HUB_R + (max(ys) - min(ys)) / 2   # covers lines running side by side
+            dots.append(f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="{C["paper"]}" stroke="{C["ink"]}" stroke-width="4"/>')
+        labels.append(f'<text x="{cx}" y="{cy + r + 18}" class="stop" text-anchor="middle">{html.escape(label)}</text>')
 
-    hub = f'<circle cx="{TRUNK}" cy="{Y_HEAD}" r="14" fill="{C["paper"]}" stroke="{C["ink"]}" stroke-width="4"/>'
+    hub = f'<circle cx="{TRUNK}" cy="{Y_HEAD}" r="{HUB_R + 2}" fill="{C["paper"]}" stroke="{C["ink"]}" stroke-width="4"/>'
     style = f"""
   .title {{ font-size: 30px; font-weight: 900; fill: {C["ink"]}; }}
   .badge {{ font-size: 12px; font-weight: 800; letter-spacing: 1.2px; fill: {C["cream"]}; }}
-  .stop {{ font-size: 14px; font-weight: 700; fill: {C["ink"]}; }}"""
-    body = "\n".join([trunk] + tracks + dots + carts + [hub, f'<text x="60" y="{Y_HEAD + 11}" class="title">Tech stack</text>']
-                     + badges + labels)
+  .stop {{ font-size: 14px; font-weight: 700; fill: {C["ink"]};
+           paint-order: stroke; stroke: #0d1117; stroke-width: 5px; stroke-linejoin: round; }}"""
+    body = "\n".join(leadins + tracks + dots + carts
+                     + [hub, f'<text x="62" y="{Y_HEAD + 11}" class="title">Tech stack</text>'] + legend + labels)
     alt = "Tech stack — " + "; ".join(
-        f"{n.title()}: {', '.join(l for l, _, _ in st)}" for n, (_, _, _, _, st) in lines.items())
-    return svg(W, h, body, style, alt, grad), alt
+        f"{n.title()}: {', '.join(l for l, _, _ in st)}" for n, (_, _, _, st) in lines.items())
+    return svg(W, h, body, style, alt, "".join(defs)), alt
 
 
 # ---------- pill button (the app's outline button), optional plane nudging forward ----------
