@@ -232,15 +232,15 @@ def header(w, name_size, body_size, chars):
 #   GAMES     climbs in two 45deg steps to run right alongside the Web line
 #             for the stations they share (Pixi.js, Three.js).
 # Shared stations are one interchange dot (white ring), never duplicated.
-# Every 45deg turn sits halfway between two stops.
-X0, STEP = 124, 130
+# Every climb sits halfway between two stops. Station names slant up
+# and to the right at 45deg, all above their dot.
+X0, STEP = 112, 125
 Y_HEAD, Y_LEGEND = 64, 134
-Y_HW_TOP, Y_WEB, Y_HW, Y_GAMES = 230, 332, 428, 524     # rows evenly spaced
+Y_HW_TOP, Y_WEB, Y_HW, Y_GAMES = 300, 470, 600, 730     # extra room above Web for its names
+RUN = 84          # horizontal run of a climb between rows (steeper than 45deg)
 BEND = 16
 STOP_R, SHARED_R = 13, 16
 LABEL = 28
-# names drawn above their dot (the rest go below), so neighbours never overlap
-ABOVE = {"Arduino", "3D printing", "JavaScript", "Node.js", "Three.js"}
 
 
 def col(c):
@@ -248,9 +248,15 @@ def col(c):
 
 
 def climb(c, y_from, y_to):
-    """A 45deg step centred in the gap after column c."""
-    mid, d = col(c) + STEP / 2, abs(y_from - y_to)
+    """A climb centred in the gap after column c."""
+    mid, d = col(c) + STEP / 2, RUN
     return [(mid - d / 2, y_from), (mid + d / 2, y_to)]
+
+
+def slanted(x, y, label):
+    """A station name reading up and to the right at 45deg from (x, y)."""
+    return (f'<text x="{x:.1f}" y="{y:.1f}" class="stop" transform="rotate(-45 {x:.1f} {y:.1f})">'
+            f'{html.escape(label)}</text>')
 
 
 def stations_svg(lines, label_pos):
@@ -272,19 +278,19 @@ def stations_svg(lines, label_pos):
                 stroke = color if len(where) == 1 else C["ink"]
                 dots.append(f'<circle cx="{x}" cy="{y}" r="{r}" fill="{C["paper"]}" stroke="{stroke}" stroke-width="4"/>')
                 lx, ly = label_pos(x, y, r, i, label)
-                labels.append(f'<text x="{lx}" y="{ly}" class="stop" text-anchor="middle">{html.escape(label)}</text>')
+                labels.append(slanted(lx, ly, label))
             continue
         r = SHARED_R + (max(ys) - min(ys)) / 2      # covers lines running side by side
         dots.append(f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="{C["paper"]}" stroke="{C["ink"]}" stroke-width="4"/>')
         lx, ly = label_pos(cx, cy, r, where[0][3], label)
-        labels.append(f'<text x="{lx}" y="{ly}" class="stop" text-anchor="middle">{html.escape(label)}</text>')
+        labels.append(slanted(lx, ly, label))
     return dots, labels
 
 
 def tech_map():
     js_x, pixi_x, three_x = col(1), col(4), col(5)
     beside_web = Y_WEB + PARALLEL                   # Games' track while beside Web
-    hw_up = [(js_x - (Y_HW - Y_WEB), Y_HW), (js_x + (Y_WEB - Y_HW_TOP), Y_HW_TOP)]
+    hw_up = [(js_x - RUN, Y_HW), (col(2) - 22, Y_HW_TOP)]
 
     lines = [  # (colour, bundle x, corners after the hub, stations)
         (C["blue"], TRUNK + PARALLEL, [(TRUNK + PARALLEL, Y_WEB), (col(5), Y_WEB)],
@@ -309,7 +315,7 @@ def tech_map():
         carts.append(cart(color, d, distances(samples, [(bx, Y_HEAD)] + [(x, y) for _, x, y in stations]),
                           offset=4.7 + li * 6.3))
     dots, labels = stations_svg([(c, s) for c, _, _, s in lines],
-                                lambda x, y, r, i, n: (x, y - r - 9) if n in ABOVE else (x, y + r + LABEL + 2))
+                                lambda x, y, r, i, n: (x + r * .45, y - r * .8 - 4))
     style = LINE_STYLE + f"""
   .title {{ font-size: 56px; }} .badge {{ font-size: 20px; }} .stop {{ font-size: {LABEL}px; }}"""
     body = "\n".join([lead] + tracks + dots + carts
