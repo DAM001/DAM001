@@ -236,6 +236,8 @@ def header(w, name_size, body_size, chars):
 # and to the right at 45deg, all above their dot.
 X0, STEP = 112, 125
 Y_HEAD, Y_LEGEND = 64, 134
+# used on all three lines: one stop on the shared trunk, before they fan out
+TRUNK_STOP, Y_TRUNK_STOP = "Python", 290
 Y_HW_TOP, Y_WEB, Y_HW, Y_GAMES = 300, 470, 600, 730     # extra room above Web for its names
 RUN = 84          # horizontal run of a climb between rows (steeper than 45deg)
 BEND = 16
@@ -312,16 +314,19 @@ def tech_map():
         elbow = 24 + (bx - (TRUNK - PARALLEL))      # nested elbows: outer lines curve wider
         d, samples = rounded(pts, [elbow] + [BEND] * (len(pts) - 2))
         tracks.append(f'<path d="{d}" fill="none" stroke="{color}" stroke-width="4" stroke-linecap="round"/>')
-        carts.append(cart(color, d, distances(samples, [(bx, Y_HEAD)] + [(x, y) for _, x, y in stations]),
+        carts.append(cart(color, d, distances(samples, [(bx, Y_HEAD), (bx, Y_TRUNK_STOP)] + [(x, y) for _, x, y in stations]),
                           offset=4.7 + li * 6.3))
     dots, labels = stations_svg([(c, s) for c, _, _, s in lines],
                                 lambda x, y, r, i, n: (x + r * .45, y - r * .8 - 4))
+    r = SHARED_R + PARALLEL                         # covers all three touching lines
+    dots.append(f'<circle cx="{TRUNK}" cy="{Y_TRUNK_STOP}" r="{r}" fill="{C["paper"]}" stroke="{C["ink"]}" stroke-width="4"/>')
+    labels.append(slanted(TRUNK + r * .45, Y_TRUNK_STOP - r * .8 - 4, TRUNK_STOP))
     style = LINE_STYLE + f"""
   .title {{ font-size: 56px; }} .badge {{ font-size: 20px; }} .stop {{ font-size: {LABEL}px; }}"""
     body = "\n".join([lead] + tracks + dots + carts
                      + [hub(TRUNK, Y_HEAD, 18), f'<text x="64" y="{Y_HEAD + 20}" class="title">Tech stack</text>']
                      + legend(64, Y_LEGEND, 20) + labels)
-    alt = "Tech stack — " + "; ".join(f"{n}: {', '.join(l for l, _, _ in s)}"
+    alt = "Tech stack — " + "; ".join(f"{n}: {', '.join([TRUNK_STOP] + [l for l, _, _ in s])}"
                                       for n, (_, _, _, s) in zip(("Web", "Hardware", "Games"), lines))
     return svg(W, h, body, style, alt, defs), alt
 
