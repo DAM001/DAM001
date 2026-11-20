@@ -200,7 +200,7 @@ LINE_STYLE = """
 
 # ---------- header: name station + intro card ----------
 def header(w, name_size, body_size, chars):
-    sy = 42                                         # name station
+    sy = 48                                         # name station
     lines = wrap(INTRO, chars)
     line_h = body_size * 1.55
     card_y = sy + name_size * .55 + 12
@@ -235,7 +235,7 @@ def header(w, name_size, body_size, chars):
 # Every climb sits halfway between two stops. Station names slant up
 # and to the right at 45deg, all above their dot.
 X0, STEP = 112, 125
-Y_HEAD, Y_LEGEND = 64, 134
+Y_HEAD, Y_LEGEND = 64, 140
 # used on all three lines: one stop on the shared trunk, before they fan out
 TRUNK_STOP, Y_TRUNK_STOP = "Python", 425
 Y_HW_TOP, Y_WEB, Y_HW, Y_GAMES = 300, 490, 630, 770     # extra room above Web for its names
@@ -331,9 +331,9 @@ def tech_map():
     dots.append(f'<circle cx="{TRUNK}" cy="{Y_TRUNK_STOP}" r="{r}" fill="{C["paper"]}" stroke="{C["ink"]}" stroke-width="4"/>')
     labels.append(slanted(*label_at(TRUNK, Y_TRUNK_STOP, r), TRUNK_STOP))
     style = LINE_STYLE + f"""
-  .title {{ font-size: 56px; }} .badge {{ font-size: 20px; }} .stop {{ font-size: {LABEL}px; }}"""
+  .title {{ font-size: 66px; }} .badge {{ font-size: 20px; }} .stop {{ font-size: {LABEL}px; }}"""
     body = "\n".join([lead] + tracks + dots + carts
-                     + [hub(TRUNK, Y_HEAD, 18), f'<text x="64" y="{Y_HEAD + 20}" class="title">Tech stack</text>']
+                     + [hub(TRUNK, Y_HEAD, 18), f'<text x="64" y="{Y_HEAD + 23}" class="title">Tech stack</text>']
                      + legend(64, Y_LEGEND, 20) + labels)
     alt = "Tech stack — " + "; ".join(f"{n}: {', '.join([TRUNK_STOP] + [l for l, _, _ in s])}"
                                       for n, (_, _, _, s) in zip(("Web", "Hardware", "Games"), lines))
@@ -360,7 +360,7 @@ def pill(label, plane=False):
 for old in os.listdir(OUT):  # drop images from earlier designs
     os.remove(os.path.join(OUT, old))
 
-write("header.svg", header(W, 64, 38, 33))
+write("header.svg", header(W, 76, 38, 33))
 tech_svg, tech_alt = tech_map()
 write("tech-stack.svg", tech_svg)
 for label, _, file, plane in LINKS:
