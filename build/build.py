@@ -223,34 +223,30 @@ def header(w, name_size, body_size, chars):
     return svg(w, round(h), body, style, "Dávid Attila Marcell — full-stack developer bridging web and hardware", defs)
 
 
-# ---------- desktop tech map: hand-laid, with a crossing and a merge ----------
+# ---------- tech map: one straight row per line ----------
 # All three lines run in from the top, through the "Tech stack" hub, touching,
-# then fan out, every bend rounded:
-#   WEB       first row, straight across.
-#   HARDWARE  second row; cuts up at 45deg THROUGH the JavaScript station,
-#             crossing the Web line there, and carries on above it.
-#   GAMES     climbs in two 45deg steps to run right alongside the Web line
-#             for the stations they share (Pixi.js, Three.js).
-# Shared stations are one interchange dot (white ring), never duplicated.
-# Every 45deg turn sits halfway between two stops.
-X0, STEP = 124, 130
+# then each curves off into its own row (the rightmost turns off first).
+# Every station name sits above its dot, slanted 45deg up and to the right;
+# the rows are far enough apart that no name crosses another line.
+# A technology on more than one line gets a white interchange ring.
+ROWS = [("Web", C["blue"], ["HTML & CSS", "JavaScript", "TypeScript", "Node.js", "Pixi.js", "Three.js"]),
+        ("Hardware", C["red"], ["ESP32", "JavaScript", "C++", "Arduino", "BLE / Serial", "3D printing"]),
+        ("Games", C["green"], ["Unity", "C#", "Photon", "Blender", "Pixi.js", "Three.js"])]
+X0, STEP = 112, 125
 Y_HEAD, Y_LEGEND = 64, 134
-Y_HW_TOP, Y_WEB, Y_HW, Y_GAMES = 230, 332, 428, 524     # rows evenly spaced
-BEND = 16
+Y_ROW0, ROW_GAP = 330, 190
 STOP_R, SHARED_R = 13, 16
 LABEL = 28
-# names drawn above their dot (the rest go below), so neighbours never overlap
-ABOVE = {"Arduino", "3D printing", "JavaScript", "Node.js", "Three.js"}
 
 
 def col(c):
     return X0 + c * STEP
 
 
-def climb(c, y_from, y_to):
-    """A 45deg step centred in the gap after column c."""
-    mid, d = col(c) + STEP / 2, abs(y_from - y_to)
-    return [(mid - d / 2, y_from), (mid + d / 2, y_to)]
+def slanted(x, y, label):
+    """A station name reading up and to the right at 45deg from (x, y)."""
+    return (f'<text x="{x:.1f}" y="{y:.1f}" class="stop" transform="rotate(-45 {x:.1f} {y:.1f})">'
+            f'{html.escape(label)}</text>')
 
 
 def stations_svg(lines, label_pos):
@@ -272,51 +268,38 @@ def stations_svg(lines, label_pos):
                 stroke = color if len(where) == 1 else C["ink"]
                 dots.append(f'<circle cx="{x}" cy="{y}" r="{r}" fill="{C["paper"]}" stroke="{stroke}" stroke-width="4"/>')
                 lx, ly = label_pos(x, y, r, i, label)
-                labels.append(f'<text x="{lx}" y="{ly}" class="stop" text-anchor="middle">{html.escape(label)}</text>')
+                labels.append(slanted(lx, ly, label))
             continue
         r = SHARED_R + (max(ys) - min(ys)) / 2      # covers lines running side by side
         dots.append(f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="{C["paper"]}" stroke="{C["ink"]}" stroke-width="4"/>')
         lx, ly = label_pos(cx, cy, r, where[0][3], label)
-        labels.append(f'<text x="{lx}" y="{ly}" class="stop" text-anchor="middle">{html.escape(label)}</text>')
+        labels.append(slanted(lx, ly, label))
     return dots, labels
 
 
 def tech_map():
-    js_x, pixi_x, three_x = col(1), col(4), col(5)
-    beside_web = Y_WEB + PARALLEL                   # Games' track while beside Web
-    hw_up = [(js_x - (Y_HW - Y_WEB), Y_HW), (js_x + (Y_WEB - Y_HW_TOP), Y_HW_TOP)]
-
-    lines = [  # (colour, bundle x, corners after the hub, stations)
-        (C["blue"], TRUNK + PARALLEL, [(TRUNK + PARALLEL, Y_WEB), (col(5), Y_WEB)],
-         [("HTML & CSS", col(0), Y_WEB), ("JavaScript", js_x, Y_WEB), ("TypeScript", col(2), Y_WEB),
-          ("Node.js", col(3), Y_WEB), ("Pixi.js", pixi_x, Y_WEB), ("Three.js", three_x, Y_WEB)]),
-        (C["red"], TRUNK, [(TRUNK, Y_HW)] + hw_up + [(col(5), Y_HW_TOP)],
-         [("ESP32", col(0), Y_HW), ("JavaScript", js_x, Y_WEB), ("C++", col(2), Y_HW_TOP),
-          ("Arduino", col(3), Y_HW_TOP), ("BLE / Serial", col(4), Y_HW_TOP), ("3D printing", col(5), Y_HW_TOP)]),
-        (C["green"], TRUNK - PARALLEL,
-         [(TRUNK - PARALLEL, Y_GAMES)] + climb(1, Y_GAMES, Y_HW) + climb(3, Y_HW, beside_web) + [(col(5), beside_web)],
-         [("Unity", col(0), Y_GAMES), ("C#", col(1), Y_GAMES), ("Photon", col(2), Y_HW),
-          ("Blender", col(3), Y_HW), ("Pixi.js", pixi_x, beside_web), ("Three.js", three_x, beside_web)]),
-    ]
-    h = Y_GAMES + 60
+    lines = []
+    for (name, color, stations), (_, bx) in zip(ROWS, reversed(BUNDLE)):
+        y = Y_ROW0 + len(lines) * ROW_GAP
+        lines.append((name, color, bx, y, [(s, col(i), y) for i, s in enumerate(stations)]))
+    h = lines[-1][3] + 36
     defs, lead = bundle("tm", 0, Y_HEAD, fade_top=True)
     tracks, carts = [], []
-    for li, (color, bx, corners, stations) in enumerate(lines):
-        pts = [(bx, Y_HEAD)] + corners
+    for li, (_, color, bx, y, stations) in enumerate(lines):
+        pts = [(bx, Y_HEAD), (bx, y), (col(5), y)]
         elbow = 24 + (bx - (TRUNK - PARALLEL))      # nested elbows: outer lines curve wider
-        d, samples = rounded(pts, [elbow] + [BEND] * (len(pts) - 2))
+        d, samples = rounded(pts, [elbow])
         tracks.append(f'<path d="{d}" fill="none" stroke="{color}" stroke-width="4" stroke-linecap="round"/>')
-        carts.append(cart(color, d, distances(samples, [(bx, Y_HEAD)] + [(x, y) for _, x, y in stations]),
+        carts.append(cart(color, d, distances(samples, [(bx, Y_HEAD)] + [(x, yy) for _, x, yy in stations]),
                           offset=4.7 + li * 6.3))
-    dots, labels = stations_svg([(c, s) for c, _, _, s in lines],
-                                lambda x, y, r, i, n: (x, y - r - 9) if n in ABOVE else (x, y + r + LABEL + 2))
+    dots, labels = stations_svg([(c, st) for _, c, _, _, st in lines],
+                                lambda x, y, r, i, n: (x + r * .45, y - r * .8 - 4))
     style = LINE_STYLE + f"""
   .title {{ font-size: 56px; }} .badge {{ font-size: 20px; }} .stop {{ font-size: {LABEL}px; }}"""
     body = "\n".join([lead] + tracks + dots + carts
                      + [hub(TRUNK, Y_HEAD, 18), f'<text x="64" y="{Y_HEAD + 20}" class="title">Tech stack</text>']
                      + legend(64, Y_LEGEND, 20) + labels)
-    alt = "Tech stack — " + "; ".join(f"{n}: {', '.join(l for l, _, _ in s)}"
-                                      for n, (_, _, _, s) in zip(("Web", "Hardware", "Games"), lines))
+    alt = "Tech stack — " + "; ".join(f"{n}: {', '.join(st)}" for n, _, st in ROWS)
     return svg(W, h, body, style, alt, defs), alt
 
 
