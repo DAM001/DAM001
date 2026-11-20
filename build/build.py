@@ -237,7 +237,7 @@ def header(w, name_size, body_size, chars):
 X0, STEP = 112, 125
 Y_HEAD, Y_LEGEND = 64, 134
 # used on all three lines: one stop on the shared trunk, before they fan out
-TRUNK_STOP, Y_TRUNK_STOP = "Python", 290
+TRUNK_STOP, Y_TRUNK_STOP = "Python", 405
 Y_HW_TOP, Y_WEB, Y_HW, Y_GAMES = 300, 470, 600, 730     # extra room above Web for its names
 RUN = 84          # horizontal run of a climb between rows (steeper than 45deg)
 BEND = 16
