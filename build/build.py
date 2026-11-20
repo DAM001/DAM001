@@ -3,7 +3,7 @@
     python build/build.py [path-to-portfolioV6]
 
 Plain Python, no dependencies. Writes the SVGs into assets/ and README.md.
-Edit HEADER_LINES / TECH_LINES / LINKS below and re-run to change the content.
+Edit HEADER_LINES / LINKS below (and the stations in tech_map) and re-run to change the content.
 
 Same map grammar as the portfolio (css/style.css, js/carts.js):
   - a blue trunk with ring stations, each station's name as a heading
@@ -24,7 +24,7 @@ SITE = "https://www.damdev.xyz/Content/portfolioV6/"
 C = dict(cream="#18181a", paper="#232326", ink="#e2ddd0", soft="#b8b2a6",
          red="#e2483c", yellow="#f2b632", blue="#5090c8", green="#5aad7c")
 FONT = "'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif"
-W = 760          # both images share this width, so the trunk lines up at x=TRUNK
+W = 800          # both images share this width, so the trunk lines up at x=TRUNK
 TRUNK = 30
 ELBOW = 24       # radius where a line curves off the trunk
 
@@ -34,15 +34,6 @@ HEADER_LINES = [
      ("web", 1), (" and ", 0), ("hardware", 1), (".", 0)],
     [("Research developer at ", 0), ("Bay Zoltán Research Institute", 1), (". I build web apps", 0)],
     [("and games, teach programming, and tinker with microchips.", 0)],
-]
-
-# Lines top to bottom: name, colour, stations (one per column, None = empty
-# column). A label on two ADJACENT lines in the same column is an
-# interchange, drawn as one capsule joining both lines.
-TECH_LINES = [
-    ("HARDWARE", C["red"],   ["ESP32", "JavaScript", "C++", "Arduino", "BLE / Serial", "3D printing"]),
-    ("WEB",      C["blue"],  ["HTML & CSS", "JavaScript", "TypeScript", "Node.js", "Pixi.js", "Three.js"]),
-    ("GAMES",    C["green"], ["Unity", "C#", "Photon", "Blender", "Pixi.js", "Three.js"]),
 ]
 
 LINKS = [  # (label, url, file, plane icon)
@@ -158,64 +149,129 @@ def header():
     return svg(W, h, body, style, "Dávid Attila Marcell — full-stack developer bridging web and hardware", grad)
 
 
-# ---------- tech stack: lines branch off the trunk, one station per technology ----------
+# ---------- tech stack: a hand-laid metro map ----------
+# All three lines leave the "Tech stack" station together as a parallel bundle
+# (like the portfolio's branches merging into the trunk), then fan out:
+#   WEB       first row, straight across.
+#   HARDWARE  second row; cuts up at 45deg THROUGH the JavaScript station,
+#             crossing the Web line there, and carries on above it.
+#   GAMES     third row; climbs at 45deg to run right alongside the Web line
+#             for the stations they share (Pixi.js, Three.js).
+# Shared stations are one interchange dot (white ring), never duplicated.
+COLS = 6
+X0, STEP = 196, 112              # column x = X0 + col * STEP
+Y_HEAD = 52                      # "Tech stack" station
+Y_WEB, Y_HW, Y_GAMES = 200, 250, 300
+Y_HW_TOP = 120                   # Hardware's row after it crosses Web
+PARALLEL = 8                     # gap between two lines running side by side
+
+
+def col(c):
+    return X0 + c * STEP
+
+
+def polyline(points):
+    return "M " + " L ".join(f"{x:.1f} {y:.1f}" for x, y in points)
+
+
+def distances(points, targets):
+    """Distance along the polyline to each target point (each lies on it)."""
+    out = []
+    for tx, ty in targets:
+        run = 0.0
+        for (ax, ay), (bx, by) in zip(points, points[1:]):
+            seg = ((bx - ax) ** 2 + (by - ay) ** 2) ** .5
+            # is the target on this segment?
+            cross = (bx - ax) * (ty - ay) - (by - ay) * (tx - ax)
+            dot = (tx - ax) * (bx - ax) + (ty - ay) * (by - ay)
+            if abs(cross) < 1e-6 * max(seg, 1) and -1e-6 <= dot <= seg * seg + 1e-6:
+                out.append(run + (dot / seg if seg else 0))
+                break
+            run += seg
+        else:
+            raise ValueError(f"station {tx},{ty} is not on the line")
+    return out
+
+
 def tech_map():
-    head_y = 52                     # "Tech stack" station
-    first_y, gap = 128, 96          # first line's y, distance between lines
-    x0, x1 = 206, W - 52            # first / last column x
-    cols = max(len(s) for _, _, s in TECH_LINES)
-    step = (x1 - x0) / (cols - 1)
-    ys = [first_y + i * gap for i in range(len(TECH_LINES))]
-    h = ys[-1] + 46
-    trunk_end = ys[-1] - ELBOW
+    js_x = col(1)
+    pixi_x, three_x = col(4), col(5)
+    games_y_top = Y_WEB + PARALLEL           # Games' track while beside Web
 
-    def is_shared_with_next(li, ci):
-        return (li + 1 < len(TECH_LINES) and ci < len(TECH_LINES[li + 1][2])
-                and TECH_LINES[li][2][ci] and TECH_LINES[li][2][ci] == TECH_LINES[li + 1][2][ci])
+    # Hardware: ESP32 on its row, then 45deg up through JavaScript to the top row.
+    hw_up_start = (js_x - (Y_HW - Y_WEB), Y_HW)
+    hw_up_end = (js_x + (Y_WEB - Y_HW_TOP), Y_HW_TOP)
+    # Games: Unity..Blender on its row, then 45deg up to run beside Web.
+    rise = Y_GAMES - games_y_top
+    g_up_end = (pixi_x - 4, games_y_top)
+    g_up_start = (g_up_end[0] - rise, Y_GAMES)
 
-    def is_shared_with_prev(li, ci):
-        return li > 0 and is_shared_with_next(li - 1, ci)
+    lines = {
+        # name: (colour, bundle x, row y, track after the elbow, stations [(label, x, y, label pos)])
+        "WEB": (C["blue"], TRUNK + PARALLEL, Y_WEB,
+                [(col(0), Y_WEB), (col(5), Y_WEB)],
+                [("HTML & CSS", col(0), Y_WEB), ("JavaScript", js_x, Y_WEB), ("TypeScript", col(2), Y_WEB),
+                 ("Node.js", col(3), Y_WEB), ("Pixi.js", pixi_x, Y_WEB), ("Three.js", three_x, Y_WEB)]),
+        "HARDWARE": (C["red"], TRUNK, Y_HW,
+                     [(col(0), Y_HW), hw_up_start, hw_up_end, (col(5), Y_HW_TOP)],
+                     [("ESP32", col(0), Y_HW), ("JavaScript", js_x, Y_WEB), ("C++", col(2), Y_HW_TOP),
+                      ("Arduino", col(3), Y_HW_TOP), ("BLE / Serial", col(4), Y_HW_TOP),
+                      ("3D printing", col(5), Y_HW_TOP)]),
+        "GAMES": (C["green"], TRUNK - PARALLEL, Y_GAMES,
+                  [(col(0), Y_GAMES), g_up_start, g_up_end, (col(5), games_y_top)],
+                  [("Unity", col(0), Y_GAMES), ("C#", col(1), Y_GAMES), ("Photon", col(2), Y_GAMES),
+                   ("Blender", col(3), Y_GAMES), ("Pixi.js", pixi_x, games_y_top),
+                   ("Three.js", three_x, games_y_top)]),
+    }
+    h = Y_GAMES + 46
+    r_base = 20
 
-    grad, trunk = faded_trunk("trunkB", 0, trunk_end, True, False)
-    tracks, badges, carts, stops, capsules, labels = [], [], [], [], [], []
-
-    # blue trunk cart: Tech stack station <-> where the last line curves off
-    carts.append(cart(C["blue"], f"M {TRUNK} {head_y} V {trunk_end}", [0, trunk_end - head_y]))
-
-    for li, (name, color, stations) in enumerate(TECH_LINES):
-        y = ys[li]
-        xs = [x0 + ci * step for ci, s in enumerate(stations) if s]
-        end = xs[-1]
-        tracks.append(f'<path d="M {TRUNK} {y - ELBOW} Q {TRUNK} {y} {TRUNK + ELBOW} {y} H {end}" fill="none" '
-                      f'stroke="{color}" stroke-width="4"/>')
-        # line badge sitting on the track, like a metro line sign
+    grad, trunk = faded_trunk("trunkB", 0, Y_HEAD, True, False)
+    tracks, badges, carts, dots, labels = [], [], [], [], []
+    for li, (name, (color, bx, row_y, track, stations)) in enumerate(lines.items()):
+        r = r_base + (bx - (TRUNK - PARALLEL))       # nested elbows: outer lines curve wider
+        start = (bx + r, row_y)
+        lead = f"M {bx} {Y_HEAD} V {row_y - r} Q {bx} {row_y} {start[0]} {row_y} "
+        rest = " ".join(f"L {x:.1f} {y:.1f}" for x, y in [start] + track)
+        tracks.append(f'<path d="{lead}{rest}" fill="none" stroke="{color}" stroke-width="4" '
+                      f'stroke-linejoin="round" stroke-linecap="round"/>')
         bw = len(name) * 8.4 + 22
-        badges.append(f'<rect x="{TRUNK + ELBOW + 14}" y="{y - 11}" width="{bw}" height="22" rx="11" fill="{color}"/>'
-                      f'<text x="{TRUNK + ELBOW + 14 + bw / 2}" y="{y + 4.5}" class="badge" text-anchor="middle">{name}</text>')
-        # start each line's cart at a different point in its loop, so they don't move in lockstep
-        carts.append(cart(color, f"M {xs[0]} {y} H {end}", [x - xs[0] for x in xs], offset=4.7 + li * 6.3))
-        for ci, label in enumerate(stations):
-            if not label:
-                continue
-            x = x0 + ci * step
-            if is_shared_with_prev(li, ci):
-                labels.append(f'<text x="{x}" y="{y + 31}" class="stop" text-anchor="middle">{html.escape(label)}</text>')
-                continue  # capsule drawn by the line above
-            if is_shared_with_next(li, ci):
-                capsules.append(f'<rect x="{x - 11}" y="{y - 11}" width="22" height="{gap + 22}" rx="11" '
-                                f'fill="{C["paper"]}" stroke="{C["ink"]}" stroke-width="4"/>')
-                continue  # labelled once, under the bottom end
-            stops.append(station(x, y, color))
-            labels.append(f'<text x="{x}" y="{y + 31}" class="stop" text-anchor="middle">{html.escape(label)}</text>')
+        badges.append(f'<rect x="{80}" y="{row_y - 11}" width="{bw}" height="22" rx="11" fill="{color}"/>'
+                      f'<text x="{80 + bw / 2}" y="{row_y + 4.5}" class="badge" text-anchor="middle">{name}</text>')
+        stops = distances(track, [(x, y) for _, x, y in stations])
+        carts.append(cart(color, polyline(track), stops, offset=4.7 + li * 6.3))
 
+    # stations: one dot per technology; shared ones become a single interchange
+    seen = {}
+    for name, (color, _, _, _, stations) in lines.items():
+        for label, x, y in stations:
+            seen.setdefault(label, []).append((color, x, y))
+    for label, where in seen.items():
+        if len(where) == 1:
+            color, x, y = where[0]
+            dots.append(station(x, y, color))
+            labels.append(f'<text x="{x}" y="{y + 28}" class="stop" text-anchor="middle">{html.escape(label)}</text>')
+            continue
+        xs = [x for _, x, _ in where]
+        ys = [y for _, _, y in where]
+        cx, cy = sum(xs) / len(xs), (min(ys) + max(ys)) / 2
+        r = 11 + (max(ys) - min(ys)) / 2           # big enough to cover side-by-side lines
+        dots.append(f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="{C["paper"]}" stroke="{C["ink"]}" stroke-width="4"/>')
+        if label == "JavaScript":
+            # the lines cross here: label goes in the free upper-left corner
+            labels.append(f'<text x="{cx - 16}" y="{cy - 16}" class="stop" text-anchor="end">{html.escape(label)}</text>')
+        else:
+            labels.append(f'<text x="{cx}" y="{cy + r + 19}" class="stop" text-anchor="middle">{html.escape(label)}</text>')
+
+    hub = f'<circle cx="{TRUNK}" cy="{Y_HEAD}" r="14" fill="{C["paper"]}" stroke="{C["ink"]}" stroke-width="4"/>'
     style = f"""
   .title {{ font-size: 30px; font-weight: 900; fill: {C["ink"]}; }}
   .badge {{ font-size: 12px; font-weight: 800; letter-spacing: 1.2px; fill: {C["cream"]}; }}
   .stop {{ font-size: 14px; font-weight: 700; fill: {C["ink"]}; }}"""
-    body = "\n".join([trunk] + tracks + stops + capsules + carts + [
-        station(TRUNK, head_y, C["blue"]),
-        f'<text x="60" y="{head_y + 11}" class="title">Tech stack</text>'] + badges + labels)
-    alt = "Tech stack — " + "; ".join(f"{n.title()}: {', '.join(s for s in st if s)}" for n, _, st in TECH_LINES)
+    body = "\n".join([trunk] + tracks + dots + carts + [hub, f'<text x="60" y="{Y_HEAD + 11}" class="title">Tech stack</text>']
+                     + badges + labels)
+    alt = "Tech stack — " + "; ".join(
+        f"{n.title()}: {', '.join(l for l, _, _ in st)}" for n, (_, _, _, _, st) in lines.items())
     return svg(W, h, body, style, alt, grad), alt
 
 
