@@ -1,11 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="122" height="42" viewBox="0 0 122 42" role="img" aria-label="Projects">
+<svg xmlns="http://www.w3.org/2000/svg" width="114" height="42" viewBox="0 0 114 42" role="img" aria-label="Projects">
 <defs></defs>
 <style>
   text { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif; }
 
-  .label { font-size: 18px; font-weight: 700; fill: #e2ddd0; }
+  .label { font-size: 16px; font-weight: 700; fill: #e2ddd0; }
   @media (prefers-reduced-motion: reduce) { .moving { display: none; } }
 </style>
-<rect x="1.5" y="1.5" width="119" height="39" rx="19.5" fill="none" stroke="#e2ddd0" stroke-width="3"/>
-<text x="20" y="27.5" class="label">Projects</text>
+<rect x="1.5" y="1.5" width="111" height="39" rx="19.5" fill="none" stroke="#e2ddd0" stroke-width="3"/>
+<text x="20" y="27" class="label">Projects</text>
 </svg>

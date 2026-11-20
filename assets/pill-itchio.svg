@@ -1,11 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="111" height="42" viewBox="0 0 111 42" role="img" aria-label="itch.io">
+<svg xmlns="http://www.w3.org/2000/svg" width="104" height="42" viewBox="0 0 104 42" role="img" aria-label="itch.io">
 <defs></defs>
 <style>
   text { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif; }
 
-  .label { font-size: 18px; font-weight: 700; fill: #e2ddd0; }
+  .label { font-size: 16px; font-weight: 700; fill: #e2ddd0; }
   @media (prefers-reduced-motion: reduce) { .moving { display: none; } }
 </style>
-<rect x="1.5" y="1.5" width="108" height="39" rx="19.5" fill="none" stroke="#e2ddd0" stroke-width="3"/>
-<text x="20" y="27.5" class="label">itch.io</text>
+<rect x="1.5" y="1.5" width="101" height="39" rx="19.5" fill="none" stroke="#e2ddd0" stroke-width="3"/>
+<text x="20" y="27" class="label">itch.io</text>
 </svg>

@@ -322,14 +322,14 @@ def tech_map():
 
 # ---------- pill button (the app's outline button), optional static plane ----------
 def pill(label, plane=False):
-    text_w = round(len(label) * 10.2)
+    text_w = round(len(label) * 9.2)
     pad = 20
     w = pad * 2 + text_w + (30 if plane else 0)
     h = 42
     style = f"""
-  .label {{ font-size: 18px; font-weight: 700; fill: {C["ink"]}; }}"""
+  .label {{ font-size: 16px; font-weight: 700; fill: {C["ink"]}; }}"""
     body = (f'<rect x="1.5" y="1.5" width="{w - 3}" height="{h - 3}" rx="19.5" fill="none" '
-            f'stroke="{C["ink"]}" stroke-width="3"/>\n<text x="{pad}" y="27.5" class="label">{html.escape(label)}</text>')
+            f'stroke="{C["ink"]}" stroke-width="3"/>\n<text x="{pad}" y="27" class="label">{html.escape(label)}</text>')
     if plane:
         body += (f'\n<image href="data:image/png;base64,{plane_b64}" x="{pad + text_w + 7}" y="10" '
                  f'width="22" height="22"/>')
@@ -356,7 +356,7 @@ def still(name, file, alt):
     return f'<a name="{name}"><img src="assets/{file}" alt="{html.escape(alt)}" width="{SHOW_W}"></a>'
 
 
-pills = "\n".join(f'<a href="{url}"><img src="assets/{file}" alt="{html.escape(label)}" height="48"></a>'
+pills = "\n".join(f'<a href="{url}"><img src="assets/{file}" alt="{html.escape(label)}" height="42"></a>'
                   for label, url, file, _ in LINKS)
 readme = f'''{still("about", "header.svg", "Dávid Attila Marcell — full-stack developer bridging web and hardware")}
 
