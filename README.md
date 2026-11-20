@@ -1,10 +1,10 @@
 <a name="about"><img src="assets/header.svg?v=1fecb8cb" alt="Dávid Attila Marcell — full-stack developer bridging web and hardware" width="600"></a>
 
 <p>
-<a href="https://www.damdev.xyz/Content/portfolioV6/"><img src="assets/pill-portfolio.svg?v=658c9b6c" alt="Portfolio" height="38"></a>
-<a href="https://www.damdev.xyz/Content/portfolioV6/#/projects"><img src="assets/pill-projects.svg?v=7108fe4d" alt="Projects" height="38"></a>
-<a href="https://www.linkedin.com/in/marcell-attila-david/"><img src="assets/pill-linkedin.svg?v=a91cffd4" alt="LinkedIn" height="38"></a>
-<a href="https://dam001.itch.io/"><img src="assets/pill-itchio.svg?v=1038dc81" alt="itch.io" height="38"></a>
+<a href="https://www.damdev.xyz/Content/portfolioV6/"><img src="assets/pill-portfolio.svg?v=fe528a34" alt="Portfolio" height="48"></a>
+<a href="https://www.damdev.xyz/Content/portfolioV6/#/projects"><img src="assets/pill-projects.svg?v=5313127b" alt="Projects" height="48"></a>
+<a href="https://www.linkedin.com/in/marcell-attila-david/"><img src="assets/pill-linkedin.svg?v=9d25d87e" alt="LinkedIn" height="48"></a>
+<a href="https://dam001.itch.io/"><img src="assets/pill-itchio.svg?v=eefab515" alt="itch.io" height="48"></a>
 </p>
 
 <a name="tech-stack"><img src="assets/tech-stack.svg?v=b8e015ed" alt="Tech stack — Web: HTML &amp; CSS, JavaScript, TypeScript, Node.js, Pixi.js, Three.js; Hardware: ESP32, JavaScript, C++, Arduino, BLE / Serial, 3D printing; Games: Unity, C#, Photon, Blender, Pixi.js, Three.js" width="600"></a>
