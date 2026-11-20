@@ -237,8 +237,8 @@ def header(w, name_size, body_size, chars):
 X0, STEP = 112, 125
 Y_HEAD, Y_LEGEND = 64, 134
 # used on all three lines: one stop on the shared trunk, before they fan out
-TRUNK_STOP, Y_TRUNK_STOP = "Python", 405
-Y_HW_TOP, Y_WEB, Y_HW, Y_GAMES = 300, 470, 600, 730     # extra room above Web for its names
+TRUNK_STOP, Y_TRUNK_STOP = "Python", 425
+Y_HW_TOP, Y_WEB, Y_HW, Y_GAMES = 300, 490, 630, 770     # extra room above Web for its names
 RUN = 84          # horizontal run of a climb between rows (steeper than 45deg)
 BEND = 16
 STOP_R, SHARED_R = 13, 16
@@ -253,6 +253,11 @@ def climb(c, y_from, y_to):
     """A climb centred in the gap after column c."""
     mid, d = col(c) + STEP / 2, RUN
     return [(mid - d / 2, y_from), (mid + d / 2, y_to)]
+
+
+def label_at(x, y, r):
+    """Where a station's name starts: just above the dot, with a clear gap."""
+    return x + 2, y - r - 16
 
 
 def slanted(x, y, label):
@@ -292,15 +297,19 @@ def stations_svg(lines, label_pos):
 def tech_map():
     js_x, pixi_x, three_x = col(1), col(4), col(5)
     beside_web = Y_WEB + PARALLEL                   # Games' track while beside Web
-    hw_up = [(js_x - RUN, Y_HW), (col(2) - 22, Y_HW_TOP)]
+    # Hardware climbs into JavaScript, runs beside Web just past its name,
+    # then climbs to its top row (shifted right a little to make room).
+    above_web = Y_WEB - PARALLEL
+    top = [col(2) + STEP * .4 + i * (col(5) - col(2) - STEP * .4) / 3 for i in range(4)]
+    hw_up = [(js_x - RUN, Y_HW), (js_x, above_web), (js_x + 50, above_web), (top[0] - 16, Y_HW_TOP)]
 
     lines = [  # (colour, bundle x, corners after the hub, stations)
         (C["blue"], TRUNK + PARALLEL, [(TRUNK + PARALLEL, Y_WEB), (col(5), Y_WEB)],
          [("HTML & CSS", col(0), Y_WEB), ("JavaScript", js_x, Y_WEB), ("TypeScript", col(2), Y_WEB),
           ("Node.js", col(3), Y_WEB), ("Pixi.js", pixi_x, Y_WEB), ("Three.js", three_x, Y_WEB)]),
-        (C["red"], TRUNK, [(TRUNK, Y_HW)] + hw_up + [(col(5), Y_HW_TOP)],
-         [("ESP32", col(0), Y_HW), ("JavaScript", js_x, Y_WEB), ("C++", col(2), Y_HW_TOP),
-          ("Arduino", col(3), Y_HW_TOP), ("BLE / Serial", col(4), Y_HW_TOP), ("3D printing", col(5), Y_HW_TOP)]),
+        (C["red"], TRUNK, [(TRUNK, Y_HW)] + hw_up + [(top[3], Y_HW_TOP)],
+         [("ESP32", col(0), Y_HW), ("JavaScript", js_x, above_web), ("C++", top[0], Y_HW_TOP),
+          ("Arduino", top[1], Y_HW_TOP), ("BLE / Serial", top[2], Y_HW_TOP), ("3D printing", top[3], Y_HW_TOP)]),
         (C["green"], TRUNK - PARALLEL,
          [(TRUNK - PARALLEL, Y_GAMES)] + climb(1, Y_GAMES, Y_HW) + climb(3, Y_HW, beside_web) + [(col(5), beside_web)],
          [("Unity", col(0), Y_GAMES), ("C#", col(1), Y_GAMES), ("Photon", col(2), Y_HW),
@@ -317,10 +326,10 @@ def tech_map():
         carts.append(cart(color, d, distances(samples, [(bx, Y_HEAD), (bx, Y_TRUNK_STOP)] + [(x, y) for _, x, y in stations]),
                           offset=4.7 + li * 6.3))
     dots, labels = stations_svg([(c, s) for c, _, _, s in lines],
-                                lambda x, y, r, i, n: (x + r * .45, y - r * .8 - 4))
+                                lambda x, y, r, i, n: label_at(x, y, r))
     r = SHARED_R + PARALLEL                         # covers all three touching lines
     dots.append(f'<circle cx="{TRUNK}" cy="{Y_TRUNK_STOP}" r="{r}" fill="{C["paper"]}" stroke="{C["ink"]}" stroke-width="4"/>')
-    labels.append(slanted(TRUNK + r * .45, Y_TRUNK_STOP - r * .8 - 4, TRUNK_STOP))
+    labels.append(slanted(*label_at(TRUNK, Y_TRUNK_STOP, r), TRUNK_STOP))
     style = LINE_STYLE + f"""
   .title {{ font-size: 56px; }} .badge {{ font-size: 20px; }} .stop {{ font-size: {LABEL}px; }}"""
     body = "\n".join([lead] + tracks + dots + carts
