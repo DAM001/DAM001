@@ -4,6 +4,13 @@
 
 Plain Python, no dependencies. Writes the SVGs into assets/ and README.md.
 Edit HEADER_LINES / TECH_LINES / LINKS below and re-run to change the content.
+
+Same map grammar as the portfolio (css/style.css, js/carts.js):
+  - a blue trunk with ring stations, each station's name as a heading
+  - paper cards with an ink border
+  - coloured lines branching off the trunk through a rounded elbow
+  - 27x15 carts that hop station to station at a constant speed, pause at
+    every stop and bounce back and forth between the ends of their line
 """
 import base64, html, os, sys
 
@@ -17,23 +24,25 @@ SITE = "https://www.damdev.xyz/Content/portfolioV6/"
 C = dict(cream="#18181a", paper="#232326", ink="#e2ddd0", soft="#b8b2a6",
          red="#e2483c", yellow="#f2b632", blue="#5090c8", green="#5aad7c")
 FONT = "'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif"
-W = 840          # every SVG shares this width so the trunk lines up at x=TRUNK
+W = 760          # both images share this width, so the trunk lines up at x=TRUNK
 TRUNK = 30
+ELBOW = 24       # radius where a line curves off the trunk
 
 # ---------- content ----------
 HEADER_LINES = [
     [("Hey, I'm ", 0), ("Marci", 1), (", a ", 0), ("full-stack developer", 1), (" bridging ", 0),
      ("web", 1), (" and ", 0), ("hardware", 1), (".", 0)],
-    [("Research developer at ", 0), ("Bay Zoltán Research Institute", 1), (". I build web apps and", 0)],
-    [("games, teach programming, and tinker with microchips when I get the chance.", 0)],
+    [("Research developer at ", 0), ("Bay Zoltán Research Institute", 1), (". I build web apps", 0)],
+    [("and games, teach programming, and tinker with microchips.", 0)],
 ]
 
-# Each line: name, colour, stations. A station shared by two lines (same
-# label, "interchange") is drawn as one capsule joining both lines.
+# Lines top to bottom: name, colour, stations (one per column, None = empty
+# column). A label on two ADJACENT lines in the same column is an
+# interchange, drawn as one capsule joining both lines.
 TECH_LINES = [
-    ("WEB", C["blue"], ["HTML & CSS", "JavaScript", "TypeScript", "Node.js", "Pixi.js", "Three.js"]),
-    ("HARDWARE", C["red"], ["ESP32", "JavaScript", "C++", "Arduino", "Web Serial / BLE", "3D printing"]),
-    ("GAMES", C["green"], ["Unity", "C#", "Photon", "Blender", "Python"]),
+    ("HARDWARE", C["red"],   ["ESP32", "JavaScript", "C++", "Arduino", "BLE / Serial", "3D printing"]),
+    ("WEB",      C["blue"],  ["HTML & CSS", "JavaScript", "TypeScript", "Node.js", "Pixi.js", "Three.js"]),
+    ("GAMES",    C["green"], ["Unity", "C#", "Photon", "Blender", "Pixi.js", "Three.js"]),
 ]
 
 LINKS = [  # (label, url, file, plane icon)
@@ -43,14 +52,13 @@ LINKS = [  # (label, url, file, plane icon)
     ("itch.io", "https://dam001.itch.io/", "pill-itchio.svg", False),
 ]
 
+# cart motion (js/carts.js uses 350 px/s and a 1 s pause; slower here, the map is small)
+SPEED, PAUSE, MIN_HOP, MAX_HOP = 120, 1.0, 0.5, 2.5
+
 os.makedirs(OUT, exist_ok=True)
 plane_b64 = base64.b64encode(open(os.path.join(PORTFOLIO, "data/icons/plane-blue.png"), "rb").read()).decode()
 
-MOTION = """
-  .pulse { transform-box: fill-box; transform-origin: center; animation: pulse 2.8s ease-out infinite; }
-  @keyframes pulse { 0% { transform: scale(1); opacity: .7; } 80%, 100% { transform: scale(2.6); opacity: 0; } }
-  @media (prefers-reduced-motion: reduce) { .pulse, .cart, .nudge { animation: none; } .fly { display: none; } }
-"""
+REDUCED = "@media (prefers-reduced-motion: reduce) { .nudge { animation: none; } .moving { display: none; } }"
 
 
 def write(name, text):
@@ -58,131 +66,174 @@ def write(name, text):
         f.write(text)
 
 
+def svg(w, h, body, style="", label=None, defs=""):
+    aria = f'role="img" aria-label="{html.escape(label)}"' if label else 'aria-hidden="true"'
+    return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}" {aria}>\n'
+            f'<defs>{defs}</defs>\n<style>\n  text {{ font-family: {FONT}; }}\n{style}\n  {REDUCED}\n</style>\n'
+            f'{body}\n</svg>\n')
+
+
 def station(x, y, color):
     return f'<circle cx="{x}" cy="{y}" r="9" fill="{C["paper"]}" stroke="{color}" stroke-width="4"/>'
 
 
-def pulse(x, y, color):
-    return f'<circle class="pulse" cx="{x}" cy="{y}" r="9" fill="none" stroke="{color}" stroke-width="3"/>'
+def faded_trunk(gid, y1, y2, fade_top, fade_bottom):
+    """Vertical trunk segment that fades out at an image edge, so the break
+    between two images reads as the line continuing, not as a cut."""
+    span = y2 - y1
+    stops = []
+    if fade_top:
+        stops += [(0, 0), (40 / span, 1)]
+    else:
+        stops += [(0, 1)]
+    if fade_bottom:
+        stops += [(1 - 40 / span, 1), (1, 0)]
+    else:
+        stops += [(1, 1)]
+    grad = (f'<linearGradient id="{gid}" gradientUnits="userSpaceOnUse" x1="0" y1="{y1}" x2="0" y2="{y2}">'
+            + "".join(f'<stop offset="{o:.3f}" stop-color="{C["blue"]}" stop-opacity="{a}"/>' for o, a in stops)
+            + "</linearGradient>")
+    rect = f'<rect x="{TRUNK - 2}" y="{y1}" width="4" height="{span}" fill="url(#{gid})"/>'
+    return grad, rect
 
 
-def plane_img(size):
-    return (f'<image href="data:image/png;base64,{plane_b64}" x="{-size / 2}" y="{-size / 2}" '
-            f'width="{size}" height="{size}"/>')
+def cart(color, path, stops, offset=0.0):
+    """A cart riding `path`, hopping between `stops` (distances along the path,
+    in px, ascending) like js/carts.js: constant speed with an eased start and
+    end per hop, a pause at every stop, bouncing between the first and last."""
+    order = list(range(len(stops))) + list(range(len(stops) - 2, 0, -1)) + [0]
+    total_len = stops[-1] if stops[-1] > 0 else 1
+    points, times, splines = [], [0.0], []
+    t = 0.0
+    for i, idx in enumerate(order):
+        here = stops[idx] / total_len
+        if i == len(order) - 1:
+            points.append(here)
+            break
+        # pause at this stop
+        points.append(here)
+        t += PAUSE
+        times.append(t)
+        splines.append("0 0 1 1")
+        points.append(here)
+        # hop to the next stop
+        nxt = order[i + 1]
+        hop = min(MAX_HOP, max(MIN_HOP, abs(stops[nxt] - stops[idx]) / SPEED))
+        t += hop
+        times.append(t)
+        splines.append(".45 0 .55 1")
+    key_times = ";".join(f"{x / t:.4f}" for x in times)
+    key_points = ";".join(f"{p:.4f}" for p in points)
+    return (f'<g class="moving"><rect x="-13.5" y="-7.5" width="27" height="15" rx="2" fill="{color}"/>'
+            f'<animateMotion dur="{t:.2f}s" begin="{-offset:.2f}s" repeatCount="indefinite" rotate="auto" calcMode="spline" '
+            f'keyPoints="{key_points}" keyTimes="{key_times}" keySplines="{";".join(splines)}" path="{path}"/></g>')
 
 
-def svg(w, h, body, style="", label=None):
-    aria = f'role="img" aria-label="{html.escape(label)}"' if label else 'aria-hidden="true"'
-    return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}" {aria}>\n'
-            f'<style>\n  text {{ font-family: {FONT}; }}\n{style}\n{MOTION}</style>\n{body}\n</svg>\n')
-
-
-# ---------- header: name station + intro card; a plane flies over, a cart rides down ----------
+# ---------- header: name station + intro card, plane flying over ----------
 def header():
-    top = 40                        # headroom for the plane's flight
-    sy = top + 44                   # name station
-    card_y = top + 80
-    card_h = 34 + 27 * len(HEADER_LINES)
-    h = card_y + card_h + 22
+    top = 44                        # headroom for the plane
+    sy = top + 26                   # name station
+    card_y = sy + 30
+    card_h = 30 + 26 * len(HEADER_LINES)
+    h = card_y + card_h + 48
     rows = []
     for i, parts in enumerate(HEADER_LINES):
         spans = "".join(f'<tspan class="{"hl" if hl else ""}">{html.escape(t)}</tspan>' for t, hl in parts)
-        rows.append(f'<text x="82" y="{card_y + 40 + i * 27}" class="body">{spans}</text>')
-    flight = f"M -40 {top - 2} C {W * .3} {top - 34}, {W * .62} {top + 20}, {W + 40} {top - 16}"
+        rows.append(f'<text x="82" y="{card_y + 37 + i * 26}" class="body">{spans}</text>')
+    flight = f"M -40 {top - 8} C {W * .3} {top - 40}, {W * .62} {top + 12}, {W + 40} {top - 22}"
+    grad, trunk = faded_trunk("trunkA", sy, h, False, True)
     style = f"""
-  .name {{ font-size: 38px; font-weight: 900; fill: {C["ink"]}; }}
-  .body {{ font-size: 16.5px; fill: {C["soft"]}; }}
-  .hl {{ fill: {C["blue"]}; font-weight: 700; }}
-  .cart {{ animation: ride 6s cubic-bezier(.45,0,.25,1) infinite; }}
-  @keyframes ride {{ 0%, 15% {{ transform: translateY(0); }} 75%, 100% {{ transform: translateY({h - sy + 34}px); }} }}"""
-    body = f"""<g class="fly">{plane_img(26)}<animateMotion dur="12s" begin="0.5s" repeatCount="indefinite" rotate="auto"
-   keyPoints="0;1;1" keyTimes="0;0.45;1" calcMode="linear" path="{flight}"/></g>
-<line x1="{TRUNK}" y1="{sy}" x2="{TRUNK}" y2="{h}" stroke="{C["blue"]}" stroke-width="4"/>
-<rect class="cart" x="{TRUNK - 7}" y="{sy - 6}" width="14" height="26" rx="5" fill="{C["blue"]}"/>
-{pulse(TRUNK, sy, C["blue"])}
+  .name {{ font-size: 36px; font-weight: 900; fill: {C["ink"]}; }}
+  .body {{ font-size: 16px; fill: {C["soft"]}; }}
+  .hl {{ fill: {C["blue"]}; font-weight: 700; }}"""
+    plane = (f'<g class="moving"><image href="data:image/png;base64,{plane_b64}" x="-13" y="-13" width="26" height="26"/>'
+             f'<animateMotion dur="12s" begin="0.5s" repeatCount="indefinite" rotate="auto" keyPoints="0;1;1" '
+             f'keyTimes="0;0.45;1" calcMode="linear" path="{flight}"/></g>')
+    body = f"""{trunk}
 {station(TRUNK, sy, C["blue"])}
-<text x="60" y="{sy + 13}" class="name">Dávid Attila Marcell</text>
-<rect x="57" y="{card_y - 5}" width="{W - 71}" height="{card_h + 10}" rx="12" fill="none" stroke="{C["blue"]}" stroke-width="4"/>
-<rect x="62.5" y="{card_y + .5}" width="{W - 82}" height="{card_h - 1}" rx="8" fill="{C["paper"]}" stroke="{C["ink"]}" stroke-width="3"/>
-{"".join(rows)}"""
-    return body, style, h
+<text x="60" y="{sy + 12}" class="name">Dávid Attila Marcell</text>
+<rect x="61.5" y="{card_y + 1.5}" width="{W - 63}" height="{card_h - 3}" rx="8" fill="{C["paper"]}" stroke="{C["ink"]}" stroke-width="3"/>
+{"".join(rows)}
+{plane}"""
+    return svg(W, h, body, style, "Dávid Attila Marcell — full-stack developer bridging web and hardware", grad)
 
 
 # ---------- tech stack: lines branch off the trunk, one station per technology ----------
 def tech_map():
-    head_y = 34                     # "Tech stack" station
-    first_y, gap = 128, 100         # y of the first line, distance between lines
-    x0, x1 = 170, W - 40            # first / last station x
-    r = 18                          # elbow radius
+    head_y = 52                     # "Tech stack" station
+    first_y, gap = 128, 96          # first line's y, distance between lines
+    x0, x1 = 206, W - 52            # first / last column x
+    cols = max(len(s) for _, _, s in TECH_LINES)
+    step = (x1 - x0) / (cols - 1)
     ys = [first_y + i * gap for i in range(len(TECH_LINES))]
-    h = ys[-1] + 44
-    step = (x1 - x0) / (max(len(s) for _, _, s in TECH_LINES) - 1)
+    h = ys[-1] + 46
+    trunk_end = ys[-1] - ELBOW
 
-    # station x per (line, label); interchange labels share the first line's x
-    pos = {}
-    for li, (_, _, stations) in enumerate(TECH_LINES):
-        for si, label in enumerate(stations):
-            pos[(li, label)] = x0 + si * step
-    owners = {}
-    for li, (_, _, stations) in enumerate(TECH_LINES):
-        for label in stations:
-            owners.setdefault(label, []).append(li)
-    for label, lis in owners.items():
-        if len(lis) > 1:
-            for li in lis:
-                pos[(li, label)] = pos[(lis[0], label)]
+    def is_shared_with_next(li, ci):
+        return (li + 1 < len(TECH_LINES) and ci < len(TECH_LINES[li + 1][2])
+                and TECH_LINES[li][2][ci] and TECH_LINES[li][2][ci] == TECH_LINES[li + 1][2][ci])
 
-    parts = [f'<line x1="{TRUNK}" y1="0" x2="{TRUNK}" y2="{ys[-1] - r}" stroke="{C["blue"]}" stroke-width="4"/>',
-             pulse(TRUNK, head_y, C["blue"]), station(TRUNK, head_y, C["blue"]),
-             f'<text x="60" y="{head_y + 11}" class="title">Tech stack</text>']
-    tracks, carts, stops, labels = [], [], [], []
+    def is_shared_with_prev(li, ci):
+        return li > 0 and is_shared_with_next(li - 1, ci)
+
+    grad, trunk = faded_trunk("trunkB", 0, trunk_end, True, False)
+    tracks, badges, carts, stops, capsules, labels = [], [], [], [], [], []
+
+    # blue trunk cart: Tech stack station <-> where the last line curves off
+    carts.append(cart(C["blue"], f"M {TRUNK} {head_y} V {trunk_end}", [0, trunk_end - head_y]))
+
     for li, (name, color, stations) in enumerate(TECH_LINES):
         y = ys[li]
-        end = max(pos[(li, s)] for s in stations)
-        path = f"M {TRUNK} {y - r} Q {TRUNK} {y} {TRUNK + r} {y} H {end}"
-        tracks.append(f'<path d="{path}" fill="none" stroke="{color}" stroke-width="4" stroke-linejoin="round"/>')
-        labels.append(f'<text x="{TRUNK + 26}" y="{y - 12}" class="line" fill="{color}">{name}</text>')
-        dur = 7 + li * 1.3
-        carts.append(f'<g class="fly"><rect x="-13" y="-7" width="26" height="14" rx="5" fill="{color}"/>'
-                     f'<animateMotion dur="{dur}s" begin="{li * 1.1}s" repeatCount="indefinite" rotate="auto" '
-                     f'keyPoints="0;1;1" keyTimes="0;0.8;1" keySplines="0.45 0 0.25 1;0 0 1 1" calcMode="spline" '
-                     f'path="{path}"/></g>')
-        for label in stations:
-            x = pos[(li, label)]
-            shared = owners[label]
-            if len(shared) > 1 and li != shared[0]:
-                labels.append(f'<text x="{x}" y="{y + 30}" class="stop" text-anchor="middle">{html.escape(label)}</text>')
-                continue  # the capsule itself is drawn once, by its first line
-            if len(shared) > 1:
-                y2 = ys[shared[-1]]
-                stops.append(f'<rect x="{x - 11}" y="{y - 11}" width="22" height="{y2 - y + 22}" rx="11" '
-                             f'fill="{C["paper"]}" stroke="{C["ink"]}" stroke-width="4"/>')
-                continue  # labelled once, under the bottom end of the capsule
+        xs = [x0 + ci * step for ci, s in enumerate(stations) if s]
+        end = xs[-1]
+        tracks.append(f'<path d="M {TRUNK} {y - ELBOW} Q {TRUNK} {y} {TRUNK + ELBOW} {y} H {end}" fill="none" '
+                      f'stroke="{color}" stroke-width="4"/>')
+        # line badge sitting on the track, like a metro line sign
+        bw = len(name) * 8.4 + 22
+        badges.append(f'<rect x="{TRUNK + ELBOW + 14}" y="{y - 11}" width="{bw}" height="22" rx="11" fill="{color}"/>'
+                      f'<text x="{TRUNK + ELBOW + 14 + bw / 2}" y="{y + 4.5}" class="badge" text-anchor="middle">{name}</text>')
+        # start each line's cart at a different point in its loop, so they don't move in lockstep
+        carts.append(cart(color, f"M {xs[0]} {y} H {end}", [x - xs[0] for x in xs], offset=4.7 + li * 6.3))
+        for ci, label in enumerate(stations):
+            if not label:
+                continue
+            x = x0 + ci * step
+            if is_shared_with_prev(li, ci):
+                labels.append(f'<text x="{x}" y="{y + 31}" class="stop" text-anchor="middle">{html.escape(label)}</text>')
+                continue  # capsule drawn by the line above
+            if is_shared_with_next(li, ci):
+                capsules.append(f'<rect x="{x - 11}" y="{y - 11}" width="22" height="{gap + 22}" rx="11" '
+                                f'fill="{C["paper"]}" stroke="{C["ink"]}" stroke-width="4"/>')
+                continue  # labelled once, under the bottom end
             stops.append(station(x, y, color))
-            labels.append(f'<text x="{x}" y="{y + 30}" class="stop" text-anchor="middle">{html.escape(label)}</text>')
+            labels.append(f'<text x="{x}" y="{y + 31}" class="stop" text-anchor="middle">{html.escape(label)}</text>')
+
     style = f"""
   .title {{ font-size: 30px; font-weight: 900; fill: {C["ink"]}; }}
-  .line {{ font-size: 12px; font-weight: 800; letter-spacing: 1.5px; }}
-  .stop {{ font-size: 14.5px; font-weight: 700; fill: {C["ink"]}; }}"""
-    body = "\n".join(parts + tracks + carts + stops + labels)
-    alt = "Tech stack — " + "; ".join(f"{n.title()}: {', '.join(s)}" for n, _, s in TECH_LINES)
-    return body, style, h, alt
+  .badge {{ font-size: 12px; font-weight: 800; letter-spacing: 1.2px; fill: {C["cream"]}; }}
+  .stop {{ font-size: 14px; font-weight: 700; fill: {C["ink"]}; }}"""
+    body = "\n".join([trunk] + tracks + stops + capsules + carts + [
+        station(TRUNK, head_y, C["blue"]),
+        f'<text x="60" y="{head_y + 11}" class="title">Tech stack</text>'] + badges + labels)
+    alt = "Tech stack — " + "; ".join(f"{n.title()}: {', '.join(s for s in st if s)}" for n, _, st in TECH_LINES)
+    return svg(W, h, body, style, alt, grad), alt
 
 
-# ---------- pill button, optionally with the portfolio's plane nudging forward ----------
+# ---------- pill button (the app's outline button), optional plane nudging forward ----------
 def pill(label, plane=False):
     text_w = round(len(label) * 8.6)
-    pad = 22
+    pad = 20
     w = pad * 2 + text_w + (30 if plane else 0)
-    h = 46
-    style = """
-  .label { font-size: 15px; font-weight: 700; fill: %s; }
-  .nudge { animation: nudge 2.4s ease-in-out infinite; }
-  @keyframes nudge { 0%%, 100%% { transform: translate(-2px, 1px); } 50%% { transform: translate(3px, -1px); } }""" % C["ink"]
-    body = (f'<rect x="1.5" y="1.5" width="{w - 3}" height="{h - 3}" rx="21" fill="{C["paper"]}" '
-            f'stroke="{C["ink"]}" stroke-width="3"/>\n<text x="{pad}" y="28.5" class="label">{html.escape(label)}</text>')
+    h = 42
+    style = f"""
+  .label {{ font-size: 15px; font-weight: 700; fill: {C["ink"]}; }}
+  .nudge {{ animation: nudge 2.4s ease-in-out infinite; }}
+  @keyframes nudge {{ 0%, 100% {{ transform: translate(-2px, 1px); }} 50% {{ transform: translate(3px, -1px); }} }}"""
+    body = (f'<rect x="1.5" y="1.5" width="{w - 3}" height="{h - 3}" rx="19.5" fill="none" '
+            f'stroke="{C["ink"]}" stroke-width="3"/>\n<text x="{pad}" y="26.5" class="label">{html.escape(label)}</text>')
     if plane:
-        body += f'\n<g transform="translate({pad + text_w + 19} 23)"><g class="nudge">{plane_img(22)}</g></g>'
+        body += (f'\n<g transform="translate({pad + text_w + 18} 21)"><g class="nudge">'
+                 f'<image href="data:image/png;base64,{plane_b64}" x="-11" y="-11" width="22" height="22"/></g></g>')
     return svg(w, h, body, style, label)
 
 
@@ -190,25 +241,24 @@ def pill(label, plane=False):
 for old in os.listdir(OUT):  # drop images from earlier designs
     os.remove(os.path.join(OUT, old))
 
-# Header and tech map are ONE image, so the trunk runs unbroken from the name
-# station, past the intro card, into the tech lines (separate images always
-# get a gap between them on GitHub). The header's cart rides down into the
-# "Tech stack" station.
-h_body, h_style, h_h = header()
-t_body, t_style, t_h, tech_alt = tech_map()
-main_alt = "Dávid Attila Marcell — full-stack developer bridging web and hardware. " + tech_alt
-write("profile.svg", svg(W, h_h + t_h, f'{h_body}\n<g transform="translate(0 {h_h})">\n{t_body}\n</g>',
-                         h_style + t_style, main_alt))
+write("header.svg", header())
+tech_svg, tech_alt = tech_map()
+write("tech-stack.svg", tech_svg)
 for label, _, file, plane in LINKS:
     write(file, pill(label, plane))
 
-pills = "\n".join(f'<a href="{url}"><img src="assets/{file}" alt="{html.escape(label)}" height="40"></a>'
+pills = "\n".join(f'<a href="{url}"><img src="assets/{file}" alt="{html.escape(label)}" height="38"></a>'
                   for label, url, file, _ in LINKS)
-readme = f'''<a href="{SITE}"><img src="assets/profile.svg" alt="{html.escape(main_alt)}" width="100%"></a>
+# The two maps are wrapped in a NAMED anchor (no href): GitHub otherwise turns
+# every bare image into a link to its own file, making the whole map one big
+# button. Only the pills are real links.
+readme = f'''<a name="about"><img src="assets/header.svg" alt="Dávid Attila Marcell — full-stack developer bridging web and hardware" width="100%"></a>
 
 <p>
 {pills}
 </p>
+
+<a name="tech-stack"><img src="assets/tech-stack.svg" alt="{html.escape(tech_alt)}" width="100%"></a>
 
 <!-- Generated by build/build.py -->
 '''
