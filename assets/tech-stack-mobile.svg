@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="466" viewBox="0 0 420 466" aria-hidden="true">
+<defs><linearGradient id="mm0" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="58"><stop offset="0.000" stop-color="#5aad7c" stop-opacity="0"/><stop offset="0.690" stop-color="#5aad7c" stop-opacity="1"/><stop offset="1.000" stop-color="#5aad7c" stop-opacity="1"/></linearGradient><linearGradient id="mm1" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="58"><stop offset="0.000" stop-color="#e2483c" stop-opacity="0"/><stop offset="0.690" stop-color="#e2483c" stop-opacity="1"/><stop offset="1.000" stop-color="#e2483c" stop-opacity="1"/></linearGradient><linearGradient id="mm2" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="58"><stop offset="0.000" stop-color="#5090c8" stop-opacity="0"/><stop offset="0.690" stop-color="#5090c8" stop-opacity="1"/><stop offset="1.000" stop-color="#5090c8" stop-opacity="1"/></linearGradient></defs>
+<style>
+  text { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif; }
+
+  .title { font-weight: 900; fill: #e2ddd0; }
+  .badge { font-weight: 800; letter-spacing: 1.2px; fill: #18181a; }
+  .stop { font-weight: 700; fill: #e2ddd0; paint-order: stroke; stroke: #0d1117; stroke-width: 5px; stroke-linejoin: round; }
+
+  .title { font-size: 32px; } .badge { font-size: 13px; } .stop { font-size: 15px; }
+  @media (prefers-reduced-motion: reduce) { .moving { display: none; } }
+</style>
+<rect x="24" y="0" width="4" height="58" fill="url(#mm0)"/><rect x="28" y="0" width="4" height="58" fill="url(#mm1)"/><rect x="32" y="0" width="4" height="58" fill="url(#mm2)"/>
+<path d="M 34.0 58.0 L 34.0 162.0 Q 34.0 190.0 62.0 190.0 L 376.0 190.0" fill="none" stroke="#5090c8" stroke-width="4" stroke-linecap="round"/>
+<path d="M 30.0 58.0 L 30.0 278.0 Q 30.0 302.0 54.0 302.0 L 376.0 302.0" fill="none" stroke="#e2483c" stroke-width="4" stroke-linecap="round"/>
+<path d="M 26.0 58.0 L 26.0 394.0 Q 26.0 414.0 46.0 414.0 L 376.0 414.0" fill="none" stroke="#5aad7c" stroke-width="4" stroke-linecap="round"/>
+<circle cx="86.0" cy="190" r="13" fill="#232326" stroke="#5090c8" stroke-width="4"/>
+<circle cx="144.0" cy="190" r="16" fill="#232326" stroke="#e2ddd0" stroke-width="4"/>
+<circle cx="144.0" cy="302" r="16" fill="#232326" stroke="#e2ddd0" stroke-width="4"/>
+<circle cx="202.0" cy="190" r="13" fill="#232326" stroke="#5090c8" stroke-width="4"/>
+<circle cx="260.0" cy="190" r="13" fill="#232326" stroke="#5090c8" stroke-width="4"/>
+<circle cx="318.0" cy="190" r="16" fill="#232326" stroke="#e2ddd0" stroke-width="4"/>
+<circle cx="318.0" cy="414" r="16" fill="#232326" stroke="#e2ddd0" stroke-width="4"/>
+<circle cx="376.0" cy="190" r="16" fill="#232326" stroke="#e2ddd0" stroke-width="4"/>
+<circle cx="376.0" cy="414" r="16" fill="#232326" stroke="#e2ddd0" stroke-width="4"/>
+<circle cx="86.0" cy="302" r="13" fill="#232326" stroke="#e2483c" stroke-width="4"/>
+<circle cx="202.0" cy="302" r="13" fill="#232326" stroke="#e2483c" stroke-width="4"/>
+<circle cx="260.0" cy="302" r="13" fill="#232326" stroke="#e2483c" stroke-width="4"/>
+<circle cx="318.0" cy="302" r="13" fill="#232326" stroke="#e2483c" stroke-width="4"/>
+<circle cx="376.0" cy="302" r="13" fill="#232326" stroke="#e2483c" stroke-width="4"/>
+<circle cx="86.0" cy="414" r="13" fill="#232326" stroke="#5aad7c" stroke-width="4"/>
+<circle cx="144.0" cy="414" r="13" fill="#232326" stroke="#5aad7c" stroke-width="4"/>
+<circle cx="202.0" cy="414" r="13" fill="#232326" stroke="#5aad7c" stroke-width="4"/>
+<circle cx="260.0" cy="414" r="13" fill="#232326" stroke="#5aad7c" stroke-width="4"/>
+<g class="moving"><rect x="-13.5" y="-7.5" width="27" height="15" rx="2" fill="#5090c8"/><animateMotion dur="19.89s" begin="-3.10s" repeatCount="indefinite" rotate="auto" calcMode="spline" keyPoints="0.0000;0.0000;0.3742;0.3742;0.4994;0.4994;0.6245;0.6245;0.7497;0.7497;0.8748;0.8748;1.0000;1.0000;0.8748;0.8748;0.7497;0.7497;0.6245;0.6245;0.4994;0.4994;0.3742;0.3742;0.0000" keyTimes="0.0000;0.0503;0.1229;0.1732;0.1983;0.2486;0.2738;0.3240;0.3492;0.3994;0.4246;0.4749;0.5000;0.5503;0.5754;0.6257;0.6508;0.7011;0.7262;0.7765;0.8017;0.8519;0.8771;0.9273;1.0000" keySplines="0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1" path="M 34.0 58.0 L 34.0 162.0 Q 34.0 190.0 62.0 190.0 L 376.0 190.0"/></g>
+<g class="moving"><rect x="-13.5" y="-7.5" width="27" height="15" rx="2" fill="#e2483c"/><animateMotion dur="21.85s" begin="-8.30s" repeatCount="indefinite" rotate="auto" calcMode="spline" keyPoints="0.0000;0.0000;0.5008;0.5008;0.6006;0.6006;0.7005;0.7005;0.8003;0.8003;0.9002;0.9002;1.0000;1.0000;0.9002;0.9002;0.8003;0.8003;0.7005;0.7005;0.6006;0.6006;0.5008;0.5008;0.0000" keyTimes="0.0000;0.0458;0.1567;0.2025;0.2254;0.2712;0.2940;0.3398;0.3627;0.4085;0.4313;0.4771;0.5000;0.5458;0.5687;0.6144;0.6373;0.6831;0.7060;0.7517;0.7746;0.8204;0.8433;0.8890;1.0000" keySplines="0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1" path="M 30.0 58.0 L 30.0 278.0 Q 30.0 302.0 54.0 302.0 L 376.0 302.0"/></g>
+<g class="moving"><rect x="-13.5" y="-7.5" width="27" height="15" rx="2" fill="#5aad7c"/><animateMotion dur="22.00s" begin="-13.50s" repeatCount="indefinite" rotate="auto" calcMode="spline" keyPoints="0.0000;0.0000;0.5848;0.5848;0.6678;0.6678;0.7509;0.7509;0.8339;0.8339;0.9170;0.9170;1.0000;1.0000;0.9170;0.9170;0.8339;0.8339;0.7509;0.7509;0.6678;0.6678;0.5848;0.5848;0.0000" keyTimes="0.0000;0.0455;0.1591;0.2045;0.2273;0.2727;0.2955;0.3409;0.3636;0.4091;0.4318;0.4773;0.5000;0.5455;0.5682;0.6136;0.6364;0.6818;0.7045;0.7500;0.7727;0.8182;0.8409;0.8864;1.0000" keySplines="0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1" path="M 26.0 58.0 L 26.0 394.0 Q 26.0 414.0 46.0 414.0 L 376.0 414.0"/></g>
+<circle cx="30" cy="58" r="18" fill="#232326" stroke="#e2ddd0" stroke-width="4"/>
+<text x="62" y="69" class="title">Tech stack</text>
+<rect x="62" y="95.975" width="52.78" height="24.05" rx="12.025" fill="#5090c8"/><text x="88.39" y="112.68" class="badge" text-anchor="middle">WEB</text>
+<rect x="124.78" y="95.975" width="99.58" height="24.05" rx="12.025" fill="#e2483c"/><text x="174.57" y="112.68" class="badge" text-anchor="middle">HARDWARE</text>
+<rect x="234.36" y="95.975" width="71.5" height="24.05" rx="12.025" fill="#5aad7c"/><text x="270.11" y="112.68" class="badge" text-anchor="middle">GAMES</text>
+<text x="86.0" y="220" class="stop" text-anchor="middle">HTML &amp; CSS</text>
+<text x="144.0" y="166" class="stop" text-anchor="middle">JavaScript</text>
+<text x="144.0" y="278" class="stop" text-anchor="middle">JavaScript</text>
+<text x="202.0" y="220" class="stop" text-anchor="middle">TypeScript</text>
+<text x="260.0" y="169" class="stop" text-anchor="middle">Node.js</text>
+<text x="318.0" y="223" class="stop" text-anchor="middle">Pixi.js</text>
+<text x="318.0" y="447" class="stop" text-anchor="middle">Pixi.js</text>
+<text x="376.0" y="166" class="stop" text-anchor="middle">Three.js</text>
+<text x="376.0" y="390" class="stop" text-anchor="middle">Three.js</text>
+<text x="86.0" y="332" class="stop" text-anchor="middle">ESP32</text>
+<text x="202.0" y="332" class="stop" text-anchor="middle">C++</text>
+<text x="260.0" y="281" class="stop" text-anchor="middle">Arduino</text>
+<text x="318.0" y="332" class="stop" text-anchor="middle">BLE / Serial</text>
+<text x="376.0" y="281" class="stop" text-anchor="middle">3D printing</text>
+<text x="86.0" y="444" class="stop" text-anchor="middle">Unity</text>
+<text x="144.0" y="393" class="stop" text-anchor="middle">C#</text>
+<text x="202.0" y="444" class="stop" text-anchor="middle">Photon</text>
+<text x="260.0" y="393" class="stop" text-anchor="middle">Blender</text>
+</svg>

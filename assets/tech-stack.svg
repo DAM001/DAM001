@@ -1,56 +1,55 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="800" height="386" viewBox="0 0 800 386" role="img" aria-label="Tech stack — Web: HTML &amp; CSS, JavaScript, TypeScript, Node.js, Pixi.js, Three.js; Hardware: ESP32, JavaScript, C++, Arduino, BLE / Serial, 3D printing; Games: Unity, C#, Photon, Blender, Pixi.js, Three.js">
-<defs><linearGradient id="in0" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="52"><stop offset="0" stop-color="#5090c8" stop-opacity="0"/><stop offset=".8" stop-color="#5090c8" stop-opacity="1"/></linearGradient><linearGradient id="in1" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="52"><stop offset="0" stop-color="#e2483c" stop-opacity="0"/><stop offset=".8" stop-color="#e2483c" stop-opacity="1"/></linearGradient><linearGradient id="in2" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="52"><stop offset="0" stop-color="#5aad7c" stop-opacity="0"/><stop offset=".8" stop-color="#5aad7c" stop-opacity="1"/></linearGradient></defs>
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="426" viewBox="0 0 860 426" role="img" aria-label="Tech stack — Web: HTML &amp; CSS, JavaScript, TypeScript, Node.js, Pixi.js, Three.js; Hardware: ESP32, JavaScript, C++, Arduino, BLE / Serial, 3D printing; Games: Unity, C#, Photon, Blender, Pixi.js, Three.js">
+<defs><linearGradient id="tm0" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="58"><stop offset="0.000" stop-color="#5aad7c" stop-opacity="0"/><stop offset="0.690" stop-color="#5aad7c" stop-opacity="1"/><stop offset="1.000" stop-color="#5aad7c" stop-opacity="1"/></linearGradient><linearGradient id="tm1" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="58"><stop offset="0.000" stop-color="#e2483c" stop-opacity="0"/><stop offset="0.690" stop-color="#e2483c" stop-opacity="1"/><stop offset="1.000" stop-color="#e2483c" stop-opacity="1"/></linearGradient><linearGradient id="tm2" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="58"><stop offset="0.000" stop-color="#5090c8" stop-opacity="0"/><stop offset="0.690" stop-color="#5090c8" stop-opacity="1"/><stop offset="1.000" stop-color="#5090c8" stop-opacity="1"/></linearGradient></defs>
 <style>
   text { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif; }
 
-  .title { font-size: 30px; font-weight: 900; fill: #e2ddd0; }
-  .badge { font-size: 12px; font-weight: 800; letter-spacing: 1.2px; fill: #18181a; }
-  .stop { font-size: 14px; font-weight: 700; fill: #e2ddd0;
-           paint-order: stroke; stroke: #0d1117; stroke-width: 5px; stroke-linejoin: round; }
-  @media (prefers-reduced-motion: reduce) { .nudge { animation: none; } .moving { display: none; } }
+  .title { font-weight: 900; fill: #e2ddd0; }
+  .badge { font-weight: 800; letter-spacing: 1.2px; fill: #18181a; }
+  .stop { font-weight: 700; fill: #e2ddd0; paint-order: stroke; stroke: #0d1117; stroke-width: 5px; stroke-linejoin: round; }
+
+  .title { font-size: 36px; } .badge { font-size: 14px; } .stop { font-size: 17px; }
+  @media (prefers-reduced-motion: reduce) { .moving { display: none; } }
 </style>
-<rect x="32" y="0" width="4" height="52" fill="url(#in0)"/>
-<rect x="28" y="0" width="4" height="52" fill="url(#in1)"/>
-<rect x="24" y="0" width="4" height="52" fill="url(#in2)"/>
-<path d="M 34.0 52.0 L 34.0 184.0 Q 34.0 214.0 64.0 214.0 L 755.0 214.0" fill="none" stroke="#5090c8" stroke-width="4" stroke-linecap="round"/>
-<path d="M 30.0 52.0 L 30.0 250.0 Q 30.0 276.0 56.0 276.0 L 155.0 276.0 Q 177.0 276.0 192.6 260.4 L 285.4 167.6 Q 301.0 152.0 323.0 152.0 L 755.0 152.0" fill="none" stroke="#e2483c" stroke-width="4" stroke-linecap="round"/>
-<path d="M 26.0 52.0 L 26.0 316.0 Q 26.0 338.0 48.0 338.0 L 250.5 338.0 Q 272.5 338.0 288.1 322.4 L 318.9 291.6 Q 334.5 276.0 356.5 276.0 L 510.5 276.0 Q 532.5 276.0 548.1 260.4 L 574.9 233.6 Q 590.5 218.0 612.5 218.0 L 755.0 218.0" fill="none" stroke="#5aad7c" stroke-width="4" stroke-linecap="round"/>
-<circle cx="110.0" cy="214.0" r="11" fill="#232326" stroke="#5090c8" stroke-width="4"/>
-<circle cx="239.0" cy="214.0" r="14.0" fill="#232326" stroke="#e2ddd0" stroke-width="4"/>
-<circle cx="368.0" cy="214.0" r="11" fill="#232326" stroke="#5090c8" stroke-width="4"/>
-<circle cx="497.0" cy="214.0" r="11" fill="#232326" stroke="#5090c8" stroke-width="4"/>
-<circle cx="626.0" cy="216.0" r="16.0" fill="#232326" stroke="#e2ddd0" stroke-width="4"/>
-<circle cx="755.0" cy="216.0" r="16.0" fill="#232326" stroke="#e2ddd0" stroke-width="4"/>
-<circle cx="110.0" cy="276.0" r="11" fill="#232326" stroke="#e2483c" stroke-width="4"/>
-<circle cx="368.0" cy="152.0" r="11" fill="#232326" stroke="#e2483c" stroke-width="4"/>
-<circle cx="497.0" cy="152.0" r="11" fill="#232326" stroke="#e2483c" stroke-width="4"/>
-<circle cx="626.0" cy="152.0" r="11" fill="#232326" stroke="#e2483c" stroke-width="4"/>
-<circle cx="755.0" cy="152.0" r="11" fill="#232326" stroke="#e2483c" stroke-width="4"/>
-<circle cx="110.0" cy="338.0" r="11" fill="#232326" stroke="#5aad7c" stroke-width="4"/>
-<circle cx="239.0" cy="338.0" r="11" fill="#232326" stroke="#5aad7c" stroke-width="4"/>
-<circle cx="368.0" cy="276.0" r="11" fill="#232326" stroke="#5aad7c" stroke-width="4"/>
-<circle cx="497.0" cy="276.0" r="11" fill="#232326" stroke="#5aad7c" stroke-width="4"/>
-<g class="moving"><rect x="-13.5" y="-7.5" width="27" height="15" rx="2" fill="#5090c8"/><animateMotion dur="26.53s" begin="-4.70s" repeatCount="indefinite" rotate="auto" calcMode="spline" keyPoints="0.0000;0.0000;0.2601;0.2601;0.4072;0.4072;0.5565;0.5565;0.7036;0.7036;0.8529;0.8529;1.0000;1.0000;0.8529;0.8529;0.7036;0.7036;0.5565;0.5565;0.4072;0.4072;0.2601;0.2601;0.0000" keyTimes="0.0000;0.0377;0.1089;0.1466;0.1869;0.2246;0.2655;0.3032;0.3434;0.3811;0.4220;0.4597;0.5000;0.5377;0.5780;0.6157;0.6566;0.6943;0.7345;0.7722;0.8131;0.8508;0.8911;0.9288;1.0000" keySplines="0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1" path="M 34.0 52.0 L 34.0 184.0 Q 34.0 214.0 64.0 214.0 L 755.0 214.0"/></g>
-<g class="moving"><rect x="-13.5" y="-7.5" width="27" height="15" rx="2" fill="#e2483c"/><animateMotion dur="28.43s" begin="-11.00s" repeatCount="indefinite" rotate="auto" calcMode="spline" keyPoints="0.0000;0.0000;0.2989;0.2989;0.4519;0.4519;0.6065;0.6065;0.7384;0.7384;0.8682;0.8682;1.0000;1.0000;0.8682;0.8682;0.7384;0.7384;0.6065;0.6065;0.4519;0.4519;0.2989;0.2989;0.0000" keyTimes="0.0000;0.0352;0.1215;0.1567;0.2009;0.2361;0.2808;0.3160;0.3541;0.3892;0.4267;0.4619;0.5000;0.5352;0.5733;0.6084;0.6459;0.6811;0.7192;0.7544;0.7991;0.8342;0.8785;0.9136;1.0000" keySplines="0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1" path="M 30.0 52.0 L 30.0 250.0 Q 30.0 276.0 56.0 276.0 L 155.0 276.0 Q 177.0 276.0 192.6 260.4 L 285.4 167.6 Q 301.0 152.0 323.0 152.0 L 755.0 152.0"/></g>
-<g class="moving"><rect x="-13.5" y="-7.5" width="27" height="15" rx="2" fill="#5aad7c"/><animateMotion dur="28.43s" begin="-17.30s" repeatCount="indefinite" rotate="auto" calcMode="spline" keyPoints="0.0000;0.0000;0.3454;0.3454;0.4679;0.4679;0.6123;0.6123;0.7345;0.7345;0.8774;0.8774;1.0000;1.0000;0.8774;0.8774;0.7345;0.7345;0.6123;0.6123;0.4679;0.4679;0.3454;0.3454;0.0000" keyTimes="0.0000;0.0352;0.1231;0.1583;0.1959;0.2311;0.2754;0.3106;0.3481;0.3833;0.4272;0.4623;0.5000;0.5352;0.5728;0.6080;0.6519;0.6870;0.7246;0.7597;0.8041;0.8393;0.8769;0.9121;1.0000" keySplines="0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1" path="M 26.0 52.0 L 26.0 316.0 Q 26.0 338.0 48.0 338.0 L 250.5 338.0 Q 272.5 338.0 288.1 322.4 L 318.9 291.6 Q 334.5 276.0 356.5 276.0 L 510.5 276.0 Q 532.5 276.0 548.1 260.4 L 574.9 233.6 Q 590.5 218.0 612.5 218.0 L 755.0 218.0"/></g>
-<circle cx="30" cy="52" r="16" fill="#232326" stroke="#e2ddd0" stroke-width="4"/>
-<text x="62" y="63" class="title">Tech stack</text>
-<rect x="60" y="85" width="47.2" height="22" rx="11" fill="#5090c8"/><text x="83.6" y="100.5" class="badge" text-anchor="middle">WEB</text>
-<rect x="117.2" y="85" width="89.2" height="22" rx="11" fill="#e2483c"/><text x="161.8" y="100.5" class="badge" text-anchor="middle">HARDWARE</text>
-<rect x="216.4" y="85" width="64.0" height="22" rx="11" fill="#5aad7c"/><text x="248.4" y="100.5" class="badge" text-anchor="middle">GAMES</text>
-<text x="110.0" y="243.0" class="stop" text-anchor="middle">HTML &amp; CSS</text>
-<text x="239.0" y="246.0" class="stop" text-anchor="middle">JavaScript</text>
-<text x="368.0" y="243.0" class="stop" text-anchor="middle">TypeScript</text>
-<text x="497.0" y="243.0" class="stop" text-anchor="middle">Node.js</text>
-<text x="626.0" y="250.0" class="stop" text-anchor="middle">Pixi.js</text>
-<text x="755.0" y="250.0" class="stop" text-anchor="middle">Three.js</text>
-<text x="110.0" y="305.0" class="stop" text-anchor="middle">ESP32</text>
-<text x="368.0" y="181.0" class="stop" text-anchor="middle">C++</text>
-<text x="497.0" y="181.0" class="stop" text-anchor="middle">Arduino</text>
-<text x="626.0" y="181.0" class="stop" text-anchor="middle">BLE / Serial</text>
-<text x="755.0" y="181.0" class="stop" text-anchor="middle">3D printing</text>
-<text x="110.0" y="367.0" class="stop" text-anchor="middle">Unity</text>
-<text x="239.0" y="367.0" class="stop" text-anchor="middle">C#</text>
-<text x="368.0" y="305.0" class="stop" text-anchor="middle">Photon</text>
-<text x="497.0" y="305.0" class="stop" text-anchor="middle">Blender</text>
+<rect x="24" y="0" width="4" height="58" fill="url(#tm0)"/><rect x="28" y="0" width="4" height="58" fill="url(#tm1)"/><rect x="32" y="0" width="4" height="58" fill="url(#tm2)"/>
+<path d="M 34.0 58.0 L 34.0 210.0 Q 34.0 242.0 66.0 242.0 L 800.0 242.0" fill="none" stroke="#5090c8" stroke-width="4" stroke-linecap="round"/>
+<path d="M 30.0 58.0 L 30.0 280.0 Q 30.0 308.0 58.0 308.0 L 158.0 308.0 Q 174.0 308.0 185.3 296.7 L 294.7 187.3 Q 306.0 176.0 322.0 176.0 L 800.0 176.0" fill="none" stroke="#e2483c" stroke-width="4" stroke-linecap="round"/>
+<path d="M 26.0 58.0 L 26.0 350.0 Q 26.0 374.0 50.0 374.0 L 261.0 374.0 Q 277.0 374.0 288.3 362.7 L 331.7 319.3 Q 343.0 308.0 359.0 308.0 L 543.0 308.0 Q 559.0 308.0 570.3 296.7 L 609.7 257.3 Q 621.0 246.0 637.0 246.0 L 800.0 246.0" fill="none" stroke="#5aad7c" stroke-width="4" stroke-linecap="round"/>
+<circle cx="100" cy="242" r="13" fill="#232326" stroke="#5090c8" stroke-width="4"/>
+<circle cx="240.0" cy="242.0" r="16.0" fill="#232326" stroke="#e2ddd0" stroke-width="4"/>
+<circle cx="380" cy="242" r="13" fill="#232326" stroke="#5090c8" stroke-width="4"/>
+<circle cx="520" cy="242" r="13" fill="#232326" stroke="#5090c8" stroke-width="4"/>
+<circle cx="660.0" cy="244.0" r="18.0" fill="#232326" stroke="#e2ddd0" stroke-width="4"/>
+<circle cx="800.0" cy="244.0" r="18.0" fill="#232326" stroke="#e2ddd0" stroke-width="4"/>
+<circle cx="100" cy="308" r="13" fill="#232326" stroke="#e2483c" stroke-width="4"/>
+<circle cx="380" cy="176" r="13" fill="#232326" stroke="#e2483c" stroke-width="4"/>
+<circle cx="520" cy="176" r="13" fill="#232326" stroke="#e2483c" stroke-width="4"/>
+<circle cx="660" cy="176" r="13" fill="#232326" stroke="#e2483c" stroke-width="4"/>
+<circle cx="800" cy="176" r="13" fill="#232326" stroke="#e2483c" stroke-width="4"/>
+<circle cx="100" cy="374" r="13" fill="#232326" stroke="#5aad7c" stroke-width="4"/>
+<circle cx="240" cy="374" r="13" fill="#232326" stroke="#5aad7c" stroke-width="4"/>
+<circle cx="380" cy="308" r="13" fill="#232326" stroke="#5aad7c" stroke-width="4"/>
+<circle cx="520" cy="308" r="13" fill="#232326" stroke="#5aad7c" stroke-width="4"/>
+<g class="moving"><rect x="-13.5" y="-7.5" width="27" height="15" rx="2" fill="#5090c8"/><animateMotion dur="27.63s" begin="-4.70s" repeatCount="indefinite" rotate="auto" calcMode="spline" keyPoints="0.0000;0.0000;0.2537;0.2537;0.4029;0.4029;0.5522;0.5522;0.7015;0.7015;0.8507;0.8507;1.0000;1.0000;0.8507;0.8507;0.7015;0.7015;0.5522;0.5522;0.4029;0.4029;0.2537;0.2537;0.0000" keyTimes="0.0000;0.0362;0.1079;0.1441;0.1864;0.2225;0.2648;0.3010;0.3432;0.3794;0.4216;0.4578;0.5000;0.5362;0.5784;0.6146;0.6568;0.6930;0.7352;0.7714;0.8136;0.8498;0.8921;0.9283;1.0000" keySplines="0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1" path="M 34.0 58.0 L 34.0 210.0 Q 34.0 242.0 66.0 242.0 L 800.0 242.0"/></g>
+<g class="moving"><rect x="-13.5" y="-7.5" width="27" height="15" rx="2" fill="#e2483c"/><animateMotion dur="29.52s" begin="-11.00s" repeatCount="indefinite" rotate="auto" calcMode="spline" keyPoints="0.0000;0.0000;0.2917;0.2917;0.4469;0.4469;0.6041;0.6041;0.7361;0.7361;0.8680;0.8680;1.0000;1.0000;0.8680;0.8680;0.7361;0.7361;0.6041;0.6041;0.4469;0.4469;0.2917;0.2917;0.0000" keyTimes="0.0000;0.0339;0.1185;0.1524;0.1989;0.2328;0.2798;0.3137;0.3532;0.3871;0.4266;0.4605;0.5000;0.5339;0.5734;0.6073;0.6468;0.6806;0.7202;0.7540;0.8011;0.8350;0.8815;0.9153;1.0000" keySplines="0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1" path="M 30.0 58.0 L 30.0 280.0 Q 30.0 308.0 58.0 308.0 L 158.0 308.0 Q 174.0 308.0 185.3 296.7 L 294.7 187.3 Q 306.0 176.0 322.0 176.0 L 800.0 176.0"/></g>
+<g class="moving"><rect x="-13.5" y="-7.5" width="27" height="15" rx="2" fill="#5aad7c"/><animateMotion dur="29.44s" begin="-17.30s" repeatCount="indefinite" rotate="auto" calcMode="spline" keyPoints="0.0000;0.0000;0.3381;0.3381;0.4628;0.4628;0.6067;0.6067;0.7309;0.7309;0.8751;0.8751;1.0000;1.0000;0.8751;0.8751;0.7309;0.7309;0.6067;0.6067;0.4628;0.4628;0.3381;0.3381;0.0000" keyTimes="0.0000;0.0340;0.1189;0.1529;0.1927;0.2266;0.2726;0.3065;0.3462;0.3801;0.4262;0.4601;0.5000;0.5340;0.5738;0.6078;0.6538;0.6878;0.7274;0.7614;0.8073;0.8413;0.8811;0.9151;1.0000" keySplines="0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1;0 0 1 1;.45 0 .55 1" path="M 26.0 58.0 L 26.0 350.0 Q 26.0 374.0 50.0 374.0 L 261.0 374.0 Q 277.0 374.0 288.3 362.7 L 331.7 319.3 Q 343.0 308.0 359.0 308.0 L 543.0 308.0 Q 559.0 308.0 570.3 296.7 L 609.7 257.3 Q 621.0 246.0 637.0 246.0 L 800.0 246.0"/></g>
+<circle cx="30" cy="58" r="18" fill="#232326" stroke="#e2ddd0" stroke-width="4"/>
+<text x="64" y="71" class="title">Tech stack</text>
+<rect x="64" y="97.05" width="56.839999999999996" height="25.900000000000002" rx="12.950000000000001" fill="#5090c8"/><text x="92.42" y="115.04" class="badge" text-anchor="middle">WEB</text>
+<rect x="130.84" y="97.05" width="107.24" height="25.900000000000002" rx="12.950000000000001" fill="#e2483c"/><text x="184.46" y="115.04" class="badge" text-anchor="middle">HARDWARE</text>
+<rect x="248.07999999999998" y="97.05" width="77.0" height="25.900000000000002" rx="12.950000000000001" fill="#5aad7c"/><text x="286.58" y="115.04" class="badge" text-anchor="middle">GAMES</text>
+<text x="100" y="275" class="stop" text-anchor="middle">HTML &amp; CSS</text>
+<text x="240.0" y="278.0" class="stop" text-anchor="middle">JavaScript</text>
+<text x="380" y="275" class="stop" text-anchor="middle">TypeScript</text>
+<text x="520" y="275" class="stop" text-anchor="middle">Node.js</text>
+<text x="660.0" y="282.0" class="stop" text-anchor="middle">Pixi.js</text>
+<text x="800.0" y="282.0" class="stop" text-anchor="middle">Three.js</text>
+<text x="100" y="341" class="stop" text-anchor="middle">ESP32</text>
+<text x="380" y="209" class="stop" text-anchor="middle">C++</text>
+<text x="520" y="209" class="stop" text-anchor="middle">Arduino</text>
+<text x="660" y="209" class="stop" text-anchor="middle">BLE / Serial</text>
+<text x="800" y="209" class="stop" text-anchor="middle">3D printing</text>
+<text x="100" y="407" class="stop" text-anchor="middle">Unity</text>
+<text x="240" y="407" class="stop" text-anchor="middle">C#</text>
+<text x="380" y="341" class="stop" text-anchor="middle">Photon</text>
+<text x="520" y="341" class="stop" text-anchor="middle">Blender</text>
 </svg>

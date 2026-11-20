@@ -4,9 +4,7 @@
   text { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif; }
 
   .label { font-size: 15px; font-weight: 700; fill: #e2ddd0; }
-  .nudge { animation: nudge 2.4s ease-in-out infinite; }
-  @keyframes nudge { 0%, 100% { transform: translate(-2px, 1px); } 50% { transform: translate(3px, -1px); } }
-  @media (prefers-reduced-motion: reduce) { .nudge { animation: none; } .moving { display: none; } }
+  @media (prefers-reduced-motion: reduce) { .moving { display: none; } }
 </style>
 <rect x="1.5" y="1.5" width="97" height="39" rx="19.5" fill="none" stroke="#e2ddd0" stroke-width="3"/>
 <text x="20" y="26.5" class="label">itch.io</text>

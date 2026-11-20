@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="285" viewBox="0 0 420 285" role="img" aria-label="Dávid Attila Marcell — full-stack developer bridging web and hardware">
+<defs><linearGradient id="hd0" gradientUnits="userSpaceOnUse" x1="0" y1="36" x2="0" y2="285.1"><stop offset="0.000" stop-color="#5aad7c" stop-opacity="1"/><stop offset="0.839" stop-color="#5aad7c" stop-opacity="1"/><stop offset="1.000" stop-color="#5aad7c" stop-opacity="0"/></linearGradient><linearGradient id="hd1" gradientUnits="userSpaceOnUse" x1="0" y1="36" x2="0" y2="285.1"><stop offset="0.000" stop-color="#e2483c" stop-opacity="1"/><stop offset="0.839" stop-color="#e2483c" stop-opacity="1"/><stop offset="1.000" stop-color="#e2483c" stop-opacity="0"/></linearGradient><linearGradient id="hd2" gradientUnits="userSpaceOnUse" x1="0" y1="36" x2="0" y2="285.1"><stop offset="0.000" stop-color="#5090c8" stop-opacity="1"/><stop offset="0.839" stop-color="#5090c8" stop-opacity="1"/><stop offset="1.000" stop-color="#5090c8" stop-opacity="0"/></linearGradient></defs>
+<style>
+  text { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif; }
+
+  .name { font-size: 27px; font-weight: 900; fill: #e2ddd0; }
+  .body { font-size: 17px; fill: #b8b2a6; }
+  .hl { fill: #5090c8; font-weight: 700; }
+  @media (prefers-reduced-motion: reduce) { .moving { display: none; } }
+</style>
+<rect x="24" y="36" width="4" height="249.10000000000002" fill="url(#hd0)"/><rect x="28" y="36" width="4" height="249.10000000000002" fill="url(#hd1)"/><rect x="32" y="36" width="4" height="249.10000000000002" fill="url(#hd2)"/>
+<circle cx="30" cy="36" r="16" fill="#232326" stroke="#e2ddd0" stroke-width="4"/>
+<text x="62" y="45.7" class="name">Dávid Attila Marcell</text>
+<rect x="61.5" y="64.3" width="357" height="171.2" rx="8" fill="#232326" stroke="#e2ddd0" stroke-width="3"/>
+<text x="84" y="92.6" class="body"><tspan class="">Hey, </tspan><tspan class="">I&#x27;m </tspan><tspan class="hl">Marci</tspan><tspan class="">, </tspan><tspan class="">a </tspan><tspan class="hl">full-stack </tspan></text><text x="84" y="118.9" class="body"><tspan class="hl">developer</tspan><tspan class=""> </tspan><tspan class="">bridging </tspan><tspan class="hl">web</tspan><tspan class=""> </tspan><tspan class="">and </tspan><tspan class="hl">hardware</tspan><tspan class="">. </tspan></text><text x="84" y="145.3" class="body"><tspan class="">Research </tspan><tspan class="">developer </tspan><tspan class="">at </tspan><tspan class="hl">Bay </tspan><tspan class="hl">Zoltán </tspan></text><text x="84" y="171.7" class="body"><tspan class="hl">Research </tspan><tspan class="hl">Institute</tspan><tspan class="">. </tspan><tspan class="">I </tspan><tspan class="">build </tspan><tspan class="">web </tspan><tspan class="">apps </tspan></text><text x="84" y="198.0" class="body"><tspan class="">and </tspan><tspan class="">games, </tspan><tspan class="">teach </tspan><tspan class="">programming, </tspan><tspan class="">and </tspan></text><text x="84" y="224.3" class="body"><tspan class="">tinker </tspan><tspan class="">with </tspan><tspan class="">microchips.</tspan></text>
+</svg>
