@@ -4,7 +4,8 @@
 
 Plain Python, no dependencies. Writes the SVGs into assets/ and README.md.
 Edit INTRO / LINKS below (and the stations in tech_map) and re-run to
-change the content. Phones get the same images, scaled down.
+change the content. Phones get the same images, scaled down to ~40%,
+so text is sized large relative to the canvas to stay readable there.
 
 Same map grammar as the portfolio (css/style.css, js/carts.js):
   - ring stations, each station's name as a heading
@@ -25,7 +26,8 @@ SITE = "https://www.damdev.xyz/Content/portfolioV6/"
 C = dict(cream="#18181a", paper="#232326", ink="#e2ddd0", soft="#b8b2a6",
          red="#e2483c", yellow="#f2b632", blue="#5090c8", green="#5aad7c")
 FONT = "'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif"
-W = 860          # desktop width (header + map share it, so the lines line up)
+W = 860          # canvas width (header + map share it, so the lines line up)
+SHOW_W = 600     # display width in the README
 TRUNK = 30
 PARALLEL = 4     # centre-to-centre gap of side-by-side lines = line width, so they touch
 # the three lines side by side, left to right (the rightmost turns off first)
@@ -48,7 +50,11 @@ LINKS = [  # (label, url, file, plane icon)
 SPEED, PAUSE, MIN_HOP, MAX_HOP = 120, 1.0, 0.5, 2.5
 
 os.makedirs(OUT, exist_ok=True)
-plane_b64 = base64.b64encode(open(os.path.join(PORTFOLIO, "data/icons/plane-blue.png"), "rb").read()).decode()
+_plane = os.path.join(PORTFOLIO, "data/icons/plane-blue.png")
+if os.path.exists(_plane):
+    plane_b64 = base64.b64encode(open(_plane, "rb").read()).decode()
+else:  # no portfolio checkout: reuse the icon embedded in the current pill
+    plane_b64 = re.search(r"base64,([^\"]+)", open(os.path.join(OUT, "pill-portfolio.svg")).read()).group(1)
 
 REDUCED = "@media (prefers-reduced-motion: reduce) { .moving { display: none; } }"
 
@@ -194,7 +200,7 @@ LINE_STYLE = """
 
 # ---------- header: name station + intro card ----------
 def header(w, name_size, body_size, chars):
-    sy = 36                                         # name station
+    sy = 42                                         # name station
     lines = wrap(INTRO, chars)
     line_h = body_size * 1.55
     card_y = sy + name_size * .55 + 12
@@ -227,12 +233,14 @@ def header(w, name_size, body_size, chars):
 #             for the stations they share (Pixi.js, Three.js).
 # Shared stations are one interchange dot (white ring), never duplicated.
 # Every 45deg turn sits halfway between two stops.
-X0, STEP = 100, 140
-Y_HEAD, Y_LEGEND = 58, 110
-Y_HW_TOP, Y_WEB, Y_HW, Y_GAMES = 176, 242, 308, 374     # rows evenly spaced
+X0, STEP = 124, 130
+Y_HEAD, Y_LEGEND = 64, 134
+Y_HW_TOP, Y_WEB, Y_HW, Y_GAMES = 230, 332, 428, 524     # rows evenly spaced
 BEND = 16
 STOP_R, SHARED_R = 13, 16
-LABEL = 17
+LABEL = 28
+# names drawn above their dot (the rest go below), so neighbours never overlap
+ABOVE = {"Arduino", "3D printing", "JavaScript", "Node.js", "Three.js"}
 
 
 def col(c):
@@ -263,12 +271,12 @@ def stations_svg(lines, label_pos):
                 r = STOP_R if len(where) == 1 else SHARED_R
                 stroke = color if len(where) == 1 else C["ink"]
                 dots.append(f'<circle cx="{x}" cy="{y}" r="{r}" fill="{C["paper"]}" stroke="{stroke}" stroke-width="4"/>')
-                lx, ly = label_pos(x, y, r, i)
+                lx, ly = label_pos(x, y, r, i, label)
                 labels.append(f'<text x="{lx}" y="{ly}" class="stop" text-anchor="middle">{html.escape(label)}</text>')
             continue
         r = SHARED_R + (max(ys) - min(ys)) / 2      # covers lines running side by side
         dots.append(f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="{C["paper"]}" stroke="{C["ink"]}" stroke-width="4"/>')
-        lx, ly = label_pos(cx, cy, r, where[0][3])
+        lx, ly = label_pos(cx, cy, r, where[0][3], label)
         labels.append(f'<text x="{lx}" y="{ly}" class="stop" text-anchor="middle">{html.escape(label)}</text>')
     return dots, labels
 
@@ -290,7 +298,7 @@ def tech_map():
          [("Unity", col(0), Y_GAMES), ("C#", col(1), Y_GAMES), ("Photon", col(2), Y_HW),
           ("Blender", col(3), Y_HW), ("Pixi.js", pixi_x, beside_web), ("Three.js", three_x, beside_web)]),
     ]
-    h = Y_GAMES + 52
+    h = Y_GAMES + 60
     defs, lead = bundle("tm", 0, Y_HEAD, fade_top=True)
     tracks, carts = [], []
     for li, (color, bx, corners, stations) in enumerate(lines):
@@ -301,12 +309,12 @@ def tech_map():
         carts.append(cart(color, d, distances(samples, [(bx, Y_HEAD)] + [(x, y) for _, x, y in stations]),
                           offset=4.7 + li * 6.3))
     dots, labels = stations_svg([(c, s) for c, _, _, s in lines],
-                                lambda x, y, r, i: (x, y + r + LABEL + 3))
+                                lambda x, y, r, i, n: (x, y - r - 9) if n in ABOVE else (x, y + r + LABEL + 2))
     style = LINE_STYLE + f"""
-  .title {{ font-size: 36px; }} .badge {{ font-size: 14px; }} .stop {{ font-size: {LABEL}px; }}"""
+  .title {{ font-size: 56px; }} .badge {{ font-size: 20px; }} .stop {{ font-size: {LABEL}px; }}"""
     body = "\n".join([lead] + tracks + dots + carts
-                     + [hub(TRUNK, Y_HEAD, 18), f'<text x="64" y="{Y_HEAD + 13}" class="title">Tech stack</text>']
-                     + legend(64, Y_LEGEND, 14) + labels)
+                     + [hub(TRUNK, Y_HEAD, 18), f'<text x="64" y="{Y_HEAD + 20}" class="title">Tech stack</text>']
+                     + legend(64, Y_LEGEND, 20) + labels)
     alt = "Tech stack — " + "; ".join(f"{n}: {', '.join(l for l, _, _ in s)}"
                                       for n, (_, _, _, s) in zip(("Web", "Hardware", "Games"), lines))
     return svg(W, h, body, style, alt, defs), alt
@@ -332,7 +340,7 @@ def pill(label, plane=False):
 for old in os.listdir(OUT):  # drop images from earlier designs
     os.remove(os.path.join(OUT, old))
 
-write("header.svg", header(W, 44, 19.5, 72))
+write("header.svg", header(W, 64, 38, 33))
 tech_svg, tech_alt = tech_map()
 write("tech-stack.svg", tech_svg)
 for label, _, file, plane in LINKS:
@@ -343,7 +351,9 @@ def still(name, file, alt):
     # Named anchor (no href): GitHub otherwise turns every bare image into a
     # link to its own file, making the whole map one big button. Only the
     # pills are real links.
-    return f'<a name="{name}"><img src="assets/{file}" alt="{html.escape(alt)}" width="100%"></a>'
+    # Fixed width, not 100%: desktop shows the big type at a normal size,
+    # while GitHub's max-width: 100% shrinks it to fit the box on phones.
+    return f'<a name="{name}"><img src="assets/{file}" alt="{html.escape(alt)}" width="{SHOW_W}"></a>'
 
 
 pills = "\n".join(f'<a href="{url}"><img src="assets/{file}" alt="{html.escape(label)}" height="38"></a>'
