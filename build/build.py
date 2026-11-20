@@ -1,14 +1,11 @@
-"""Builds the profile README's images in the portfolio's dark metro-map style.
+"""Builds the profile README and its images in the portfolio's dark metro-map style.
 
     python build/build.py [path-to-portfolioV6]
 
-Reads the main-row projects (isFeatured, in order) from the portfolio's
-data/projects.json, renders each as a card PNG (Playwright + Edge), and
-writes the SVG header, section title and link pills into assets/.
-Re-run it whenever the portfolio's featured projects change.
+Plain Python, no dependencies. Writes the SVGs into assets/ and README.md.
+Edit HEADER_LINES / TECH_LINES / LINKS below and re-run to change the content.
 """
-import base64, html, json, os, sys
-from datetime import datetime
+import base64, html, os, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
@@ -23,8 +20,37 @@ FONT = "'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, 
 W = 840          # every SVG shares this width so the trunk lines up at x=TRUNK
 TRUNK = 30
 
+# ---------- content ----------
+HEADER_LINES = [
+    [("Hey, I'm ", 0), ("Marci", 1), (", a ", 0), ("full-stack developer", 1), (" bridging ", 0),
+     ("web", 1), (" and ", 0), ("hardware", 1), (".", 0)],
+    [("Research developer at ", 0), ("Bay Zoltán Research Institute", 1), (". I build web apps and", 0)],
+    [("games, teach programming, and tinker with microchips when I get the chance.", 0)],
+]
+
+# Each line: name, colour, stations. A station shared by two lines (same
+# label, "interchange") is drawn as one capsule joining both lines.
+TECH_LINES = [
+    ("WEB", C["blue"], ["HTML & CSS", "JavaScript", "TypeScript", "Node.js", "Pixi.js", "Three.js"]),
+    ("HARDWARE", C["red"], ["ESP32", "JavaScript", "C++", "Arduino", "Web Serial / BLE", "3D printing"]),
+    ("GAMES", C["green"], ["Unity", "C#", "Photon", "Blender", "Python"]),
+]
+
+LINKS = [  # (label, url, file, plane icon)
+    ("Portfolio", SITE, "pill-portfolio.svg", True),
+    ("Projects", SITE + "#/projects", "pill-projects.svg", False),
+    ("LinkedIn", "https://www.linkedin.com/in/marcell-attila-david/", "pill-linkedin.svg", False),
+    ("itch.io", "https://dam001.itch.io/", "pill-itchio.svg", False),
+]
+
 os.makedirs(OUT, exist_ok=True)
 plane_b64 = base64.b64encode(open(os.path.join(PORTFOLIO, "data/icons/plane-blue.png"), "rb").read()).decode()
+
+MOTION = """
+  .pulse { transform-box: fill-box; transform-origin: center; animation: pulse 2.8s ease-out infinite; }
+  @keyframes pulse { 0% { transform: scale(1); opacity: .7; } 80%, 100% { transform: scale(2.6); opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .pulse, .cart, .nudge { animation: none; } .fly { display: none; } }
+"""
 
 
 def write(name, text):
@@ -36,152 +62,152 @@ def station(x, y, color):
     return f'<circle cx="{x}" cy="{y}" r="9" fill="{C["paper"]}" stroke="{color}" stroke-width="4"/>'
 
 
-# ---------- header: name station + intro card, a cart running down the line ----------
+def pulse(x, y, color):
+    return f'<circle class="pulse" cx="{x}" cy="{y}" r="9" fill="none" stroke="{color}" stroke-width="3"/>'
+
+
+def plane_img(size):
+    return (f'<image href="data:image/png;base64,{plane_b64}" x="{-size / 2}" y="{-size / 2}" '
+            f'width="{size}" height="{size}"/>')
+
+
+def svg(w, h, body, style="", label=None):
+    aria = f'role="img" aria-label="{html.escape(label)}"' if label else 'aria-hidden="true"'
+    return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}" {aria}>\n'
+            f'<style>\n  text {{ font-family: {FONT}; }}\n{style}\n{MOTION}</style>\n{body}\n</svg>\n')
+
+
+# ---------- header: name station + intro card; a plane flies over, a cart rides down ----------
 def header():
-    lines = [
-        [("Hey, I'm ", 0), ("Marci", 1), (", a ", 0), ("full-stack developer", 1), (" bridging ", 0),
-         ("web", 1), (" and ", 0), ("hardware", 1), (".", 0)],
-        [("Research developer at ", 0), ("Bay Zoltán Research Institute", 1), (". I build ", 0),
-         ("web apps", 1), (" and ", 0), ("games", 1), (",", 0)],
-        [("teach programming, and tinker with ", 0), ("microchips", 1), (" when I get the chance.", 0)],
-    ]
+    top = 40                        # headroom for the plane's flight
+    sy = top + 44                   # name station
+    card_y = top + 80
+    card_h = 34 + 27 * len(HEADER_LINES)
+    h = card_y + card_h + 22
     rows = []
-    for i, parts in enumerate(lines):
-        spans = "".join(
-            f'<tspan class="{"hl" if hl else ""}">{html.escape(t)}</tspan>' for t, hl in parts)
-        rows.append(f'<text x="80" y="{134 + i * 27}" class="body">{spans}</text>')
-    stack = "JavaScript · TypeScript · Node.js · Pixi.js · Three.js · ESP32 · C++ · Unity"
-    h = 268
-    return f'''<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{h}" viewBox="0 0 {W} {h}" role="img" aria-label="Dávid Attila Marcell — full-stack developer bridging web and hardware">
-<style>
-  text {{ font-family: {FONT}; }}
-  .name {{ font-size: 36px; font-weight: 900; fill: {C["ink"]}; }}
+    for i, parts in enumerate(HEADER_LINES):
+        spans = "".join(f'<tspan class="{"hl" if hl else ""}">{html.escape(t)}</tspan>' for t, hl in parts)
+        rows.append(f'<text x="82" y="{card_y + 40 + i * 27}" class="body">{spans}</text>')
+    flight = f"M -40 {top - 2} C {W * .3} {top - 34}, {W * .62} {top + 20}, {W + 40} {top - 16}"
+    style = f"""
+  .name {{ font-size: 38px; font-weight: 900; fill: {C["ink"]}; }}
   .body {{ font-size: 16.5px; fill: {C["soft"]}; }}
   .hl {{ fill: {C["blue"]}; font-weight: 700; }}
-  .stack {{ font-size: 13.5px; font-weight: 700; fill: {C["soft"]}; letter-spacing: .3px; }}
-  .cart {{ animation: ride 7s cubic-bezier(.45,0,.25,1) infinite; }}
-  @keyframes ride {{
-    0%, 12% {{ transform: translateY(0); }}
-    70%, 100% {{ transform: translateY({h - 52}px); }}
-  }}
-  @media (prefers-reduced-motion: reduce) {{ .cart {{ animation: none; }} }}
-</style>
-<line x1="{TRUNK}" y1="44" x2="{TRUNK}" y2="{h}" stroke="{C["blue"]}" stroke-width="4"/>
-<rect class="cart" x="{TRUNK - 7}" y="38" width="14" height="26" rx="5" fill="{C["blue"]}"/>
-{station(TRUNK, 44, C["blue"])}
-<text x="60" y="57" class="name">Dávid Attila Marcell</text>
-<rect x="56" y="78" width="{W - 70}" height="{h - 92}" rx="12" fill="none" stroke="{C["blue"]}" stroke-width="4"/>
-<rect x="61.5" y="83.5" width="{W - 81}" height="{h - 103}" rx="8" fill="{C["paper"]}" stroke="{C["ink"]}" stroke-width="3"/>
-{"".join(rows)}
-<text x="80" y="{h - 38}" class="stack">{html.escape(stack)}</text>
-</svg>
-'''
+  .cart {{ animation: ride 6s cubic-bezier(.45,0,.25,1) infinite; }}
+  @keyframes ride {{ 0%, 15% {{ transform: translateY(0); }} 75%, 100% {{ transform: translateY({h - sy + 10}px); }} }}"""
+    body = f"""<g class="fly">{plane_img(26)}<animateMotion dur="12s" begin="0.5s" repeatCount="indefinite" rotate="auto"
+   keyPoints="0;1;1" keyTimes="0;0.45;1" calcMode="linear" path="{flight}"/></g>
+<line x1="{TRUNK}" y1="{sy}" x2="{TRUNK}" y2="{h}" stroke="{C["blue"]}" stroke-width="4"/>
+<rect class="cart" x="{TRUNK - 7}" y="{sy - 6}" width="14" height="26" rx="5" fill="{C["blue"]}"/>
+{pulse(TRUNK, sy, C["blue"])}
+{station(TRUNK, sy, C["blue"])}
+<text x="60" y="{sy + 13}" class="name">Dávid Attila Marcell</text>
+<rect x="57" y="{card_y - 5}" width="{W - 71}" height="{card_h + 10}" rx="12" fill="none" stroke="{C["blue"]}" stroke-width="4"/>
+<rect x="62.5" y="{card_y + .5}" width="{W - 82}" height="{card_h - 1}" rx="8" fill="{C["paper"]}" stroke="{C["ink"]}" stroke-width="3"/>
+{"".join(rows)}"""
+    return svg(W, h, body, style, "Dávid Attila Marcell — full-stack developer bridging web and hardware")
 
 
-# ---------- section title: a station on its own line colour ----------
-def section(title, color):
-    h = 64
-    return f'''<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{h}" viewBox="0 0 {W} {h}" role="img" aria-label="{html.escape(title)}">
-<style> text {{ font-family: {FONT}; font-size: 30px; font-weight: 900; fill: {C["ink"]}; }} </style>
-<line x1="{TRUNK}" y1="0" x2="{TRUNK}" y2="{h}" stroke="{color}" stroke-width="4"/>
-{station(TRUNK, 34, color)}
-<text x="60" y="45">{html.escape(title)}</text>
-</svg>
-'''
+# ---------- tech stack: lines branch off the trunk, one station per technology ----------
+def tech_map():
+    head_y = 34                     # "Tech stack" station
+    first_y, gap = 128, 100         # y of the first line, distance between lines
+    x0, x1 = 170, W - 40            # first / last station x
+    r = 18                          # elbow radius
+    ys = [first_y + i * gap for i in range(len(TECH_LINES))]
+    h = ys[-1] + 44
+    step = (x1 - x0) / (max(len(s) for _, _, s in TECH_LINES) - 1)
+
+    # station x per (line, label); interchange labels share the first line's x
+    pos = {}
+    for li, (_, _, stations) in enumerate(TECH_LINES):
+        for si, label in enumerate(stations):
+            pos[(li, label)] = x0 + si * step
+    owners = {}
+    for li, (_, _, stations) in enumerate(TECH_LINES):
+        for label in stations:
+            owners.setdefault(label, []).append(li)
+    for label, lis in owners.items():
+        if len(lis) > 1:
+            for li in lis:
+                pos[(li, label)] = pos[(lis[0], label)]
+
+    parts = [f'<line x1="{TRUNK}" y1="0" x2="{TRUNK}" y2="{ys[-1] - r}" stroke="{C["blue"]}" stroke-width="4"/>',
+             pulse(TRUNK, head_y, C["blue"]), station(TRUNK, head_y, C["blue"]),
+             f'<text x="60" y="{head_y + 11}" class="title">Tech stack</text>']
+    tracks, carts, stops, labels = [], [], [], []
+    for li, (name, color, stations) in enumerate(TECH_LINES):
+        y = ys[li]
+        end = max(pos[(li, s)] for s in stations)
+        path = f"M {TRUNK} {y - r} Q {TRUNK} {y} {TRUNK + r} {y} H {end}"
+        tracks.append(f'<path d="{path}" fill="none" stroke="{color}" stroke-width="4" stroke-linejoin="round"/>')
+        labels.append(f'<text x="{TRUNK + 26}" y="{y - 12}" class="line" fill="{color}">{name}</text>')
+        dur = 7 + li * 1.3
+        carts.append(f'<g class="fly"><rect x="-13" y="-7" width="26" height="14" rx="5" fill="{color}"/>'
+                     f'<animateMotion dur="{dur}s" begin="{li * 1.1}s" repeatCount="indefinite" rotate="auto" '
+                     f'keyPoints="0;1;1" keyTimes="0;0.8;1" keySplines="0.45 0 0.25 1;0 0 1 1" calcMode="spline" '
+                     f'path="{path}"/></g>')
+        for label in stations:
+            x = pos[(li, label)]
+            shared = owners[label]
+            if len(shared) > 1 and li != shared[0]:
+                labels.append(f'<text x="{x}" y="{y + 30}" class="stop" text-anchor="middle">{html.escape(label)}</text>')
+                continue  # the capsule itself is drawn once, by its first line
+            if len(shared) > 1:
+                y2 = ys[shared[-1]]
+                stops.append(f'<rect x="{x - 11}" y="{y - 11}" width="22" height="{y2 - y + 22}" rx="11" '
+                             f'fill="{C["paper"]}" stroke="{C["ink"]}" stroke-width="4"/>')
+                continue  # labelled once, under the bottom end of the capsule
+            stops.append(station(x, y, color))
+            labels.append(f'<text x="{x}" y="{y + 30}" class="stop" text-anchor="middle">{html.escape(label)}</text>')
+    style = f"""
+  .title {{ font-size: 30px; font-weight: 900; fill: {C["ink"]}; }}
+  .line {{ font-size: 12px; font-weight: 800; letter-spacing: 1.5px; }}
+  .stop {{ font-size: 14.5px; font-weight: 700; fill: {C["ink"]}; }}"""
+    body = "\n".join(parts + tracks + carts + stops + labels)
+    alt = "Tech stack — " + "; ".join(f"{n.title()}: {', '.join(s)}" for n, _, s in TECH_LINES)
+    return svg(W, h, body, style, alt), alt
 
 
-# ---------- pill button, optionally with the portfolio's plane ----------
+# ---------- pill button, optionally with the portfolio's plane nudging forward ----------
 def pill(label, plane=False):
     text_w = round(len(label) * 8.6)
     pad = 22
-    icon = 30 if plane else 0
-    w = pad * 2 + text_w + icon
+    w = pad * 2 + text_w + (30 if plane else 0)
     h = 46
-    plane_svg = (f'<image href="data:image/png;base64,{plane_b64}" x="{pad + text_w + 8}" y="12" width="22" height="22"/>'
-                 if plane else "")
-    return f'''<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}" role="img" aria-label="{html.escape(label)}">
-<style> text {{ font-family: {FONT}; font-size: 15px; font-weight: 700; fill: {C["ink"]}; }} </style>
-<rect x="1.5" y="1.5" width="{w - 3}" height="{h - 3}" rx="21" fill="{C["paper"]}" stroke="{C["ink"]}" stroke-width="3"/>
-<text x="{pad}" y="28.5">{html.escape(label)}</text>
-{plane_svg}
-</svg>
-'''
+    style = """
+  .label { font-size: 15px; font-weight: 700; fill: %s; }
+  .nudge { animation: nudge 2.4s ease-in-out infinite; }
+  @keyframes nudge { 0%%, 100%% { transform: translate(-2px, 1px); } 50%% { transform: translate(3px, -1px); } }""" % C["ink"]
+    body = (f'<rect x="1.5" y="1.5" width="{w - 3}" height="{h - 3}" rx="21" fill="{C["paper"]}" '
+            f'stroke="{C["ink"]}" stroke-width="3"/>\n<text x="{pad}" y="28.5" class="label">{html.escape(label)}</text>')
+    if plane:
+        body += f'\n<g transform="translate({pad + text_w + 19} 23)"><g class="nudge">{plane_img(22)}</g></g>'
+    return svg(w, h, body, style, label)
 
+
+# ---------- write everything ----------
+for old in os.listdir(OUT):  # drop images from earlier designs
+    os.remove(os.path.join(OUT, old))
 
 write("header.svg", header())
-write("projects.svg", section("Projects", C["yellow"]))
-write("pill-portfolio.svg", pill("Portfolio", plane=True))
-write("pill-linkedin.svg", pill("LinkedIn"))
-write("pill-itchio.svg", pill("itch.io"))
-write("pill-all-projects.svg", pill("See all projects", plane=True))
+tech_svg, tech_alt = tech_map()
+write("tech-stack.svg", tech_svg)
+for label, _, file, plane in LINKS:
+    write(file, pill(label, plane))
 
-
-# ---------- project cards: same markup/CSS as the portfolio's main row ----------
-projects = json.load(open(os.path.join(PORTFOLIO, "data/projects.json"), encoding="utf-8"))
-featured = [p for p in projects if p.get("isFeatured")][:6]
-
-
-def card_html(p):
-    d = datetime.fromisoformat(p["timestamp"].replace("Z", "+00:00"))
-    img = "file:///" + os.path.abspath(os.path.join(PORTFOLIO, p["images"][0])).replace("\\", "/")
-    plane = "file:///" + os.path.abspath(os.path.join(PORTFOLIO, "data/icons/plane-blue.png")).replace("\\", "/")
-    return f'''<!doctype html><html><head><meta charset="utf-8"><style>
-  html, body {{ margin: 0; background: transparent; }}
-  .card {{ position: relative; box-sizing: border-box; width: 240px; height: 360px; display: flex; align-items: flex-end;
-          border: 3px solid {C["ink"]}; border-radius: 8px; overflow: hidden; background: {C["paper"]} url('{img}') center/cover no-repeat;
-          font-family: {FONT}; }}
-  .plane {{ position: absolute; top: 10px; right: 10px; width: 26px; height: 26px; transform: rotate(-45deg); }}
-  .info {{ width: 100%; background: {C["paper"]}; border-top: 3px solid {C["ink"]}; padding: 10px; box-sizing: border-box; }}
-  .date {{ margin: -4px 0 2px; color: {C["soft"]}; font-size: 12.8px; }}
-  .title {{ margin: 0; color: {C["ink"]}; font-weight: 800; font-size: 15.2px; line-height: 1.1;
-           white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
-</style></head><body>
-<div class="card"><img class="plane" src="{plane}">
-<div class="info"><p class="date">{d:%d/%m/%Y}</p><p class="title">{html.escape(p["nameEng"])}</p></div></div>
-</body></html>'''
-
-
-from playwright.sync_api import sync_playwright
-
-for old in os.listdir(OUT):
-    if old.startswith("card-"):
-        os.remove(os.path.join(OUT, old))
-
-with sync_playwright() as pw:
-    browser = pw.chromium.launch(channel="msedge")
-    page = browser.new_page(viewport={"width": 260, "height": 380}, device_scale_factor=2)
-    for p in featured:
-        tmp = os.path.join(HERE, "_card.html")
-        open(tmp, "w", encoding="utf-8").write(card_html(p))
-        page.goto("file:///" + tmp.replace("\\", "/"))
-        page.wait_for_load_state("networkidle")
-        page.locator(".card").screenshot(path=os.path.join(OUT, f"card-{p['id']}.png"), omit_background=True)
-        os.remove(tmp)
-    browser.close()
-
-# ---------- README ----------
-cards = "\n".join(
-    f'<a href="{SITE}#/projects/{p["id"]}"><img src="assets/card-{p["id"]}.png" alt="{html.escape(p["nameEng"])}" width="250"></a>'
-    for p in featured)
-
+pills = "\n".join(f'<a href="{url}"><img src="assets/{file}" alt="{html.escape(label)}" height="40"></a>'
+                  for label, url, file, _ in LINKS)
 readme = f'''<a href="{SITE}"><img src="assets/header.svg" alt="Dávid Attila Marcell — full-stack developer bridging web and hardware" width="100%"></a>
 
 <p>
-<a href="{SITE}"><img src="assets/pill-portfolio.svg" alt="Portfolio" height="40"></a>
-<a href="https://www.linkedin.com/in/marcell-attila-david/"><img src="assets/pill-linkedin.svg" alt="LinkedIn" height="40"></a>
-<a href="https://dam001.itch.io/"><img src="assets/pill-itchio.svg" alt="itch.io" height="40"></a>
+{pills}
 </p>
 
-<a href="{SITE}#/projects"><img src="assets/projects.svg" alt="Projects" width="100%"></a>
+<a href="{SITE}#/projects"><img src="assets/tech-stack.svg" alt="{html.escape(tech_alt)}" width="100%"></a>
 
-<p>
-{cards}
-</p>
-
-<a href="{SITE}#/projects"><img src="assets/pill-all-projects.svg" alt="See all projects" height="40"></a>
-
-<!-- Generated by build/build.py from the portfolio's featured projects. -->
+<!-- Generated by build/build.py -->
 '''
 with open(os.path.join(REPO, "README.md"), "w", encoding="utf-8", newline="\n") as f:
     f.write(readme)
-print("built", len(featured), "cards:", ", ".join(p["id"] for p in featured))
+print("built:", ", ".join(sorted(os.listdir(OUT))))

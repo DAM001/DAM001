@@ -1,6 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="104" height="46" viewBox="0 0 104 46" role="img" aria-label="itch.io">
-<style> text { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; font-weight: 700; fill: #e2ddd0; } </style>
-<rect x="1.5" y="1.5" width="101" height="43" rx="21" fill="#232326" stroke="#e2ddd0" stroke-width="3"/>
-<text x="22" y="28.5">itch.io</text>
+<style>
+  text { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif; }
 
+  .label { font-size: 15px; font-weight: 700; fill: #e2ddd0; }
+  .nudge { animation: nudge 2.4s ease-in-out infinite; }
+  @keyframes nudge { 0%, 100% { transform: translate(-2px, 1px); } 50% { transform: translate(3px, -1px); } }
+
+  .pulse { transform-box: fill-box; transform-origin: center; animation: pulse 2.8s ease-out infinite; }
+  @keyframes pulse { 0% { transform: scale(1); opacity: .7; } 80%, 100% { transform: scale(2.6); opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .pulse, .cart, .nudge { animation: none; } .fly { display: none; } }
+</style>
+<rect x="1.5" y="1.5" width="101" height="43" rx="21" fill="#232326" stroke="#e2ddd0" stroke-width="3"/>
+<text x="22" y="28.5" class="label">itch.io</text>
 </svg>
